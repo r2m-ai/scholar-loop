@@ -20,4 +20,4 @@ Submodules are intentionally not re-exported here (nor from the subpackages) so 
 without an import-ordering warning. Each module's docstring documents its role.
 """
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"

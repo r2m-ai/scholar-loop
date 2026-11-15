@@ -108,6 +108,7 @@ evidence behind each sentence. No API key, no GPU.
 | I want to… | Run | Costs |
 |---|---|---|
 | browse finished research | `python3 -m scholarloop.ui`, then **Explore a real run** | free |
+| replay a recorded run in the terminal and try the sentence check | `scholarloop replay` · `scholarloop trace "text"` · `scholarloop check "sentence"` | free |
 | watch the loop on a scripted model | `python examples/quickstart.py` · `ideation_demo.py` · `writing_demo.py` | free |
 | run real torch training, scripted model | `pip install -e ".[dev,engines]"`, then `python examples/campaign_demo.py` | free |
 | do live research | `pip install -e ".[dev,engines,llm]"`, add your Anthropic key under **Connections** in the UI | API spend, capped |

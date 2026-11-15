@@ -42,5 +42,3 @@ DESIGN.md
 # published as its own repository, without the organiser's key)
 human_eval/
 
-# Recorded runs shipped with the package for `scholarloop replay` (held back until release)
-scholarloop/samples/

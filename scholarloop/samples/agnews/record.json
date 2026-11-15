@@ -1,0 +1,1975 @@
+{
+ "version": 1,
+ "name": "agnews_case",
+ "topic": "XGBoost-style column subsampling and L1 shrinkage transferred to neural BoW",
+ "steer": {
+  "interest": "I want to know which cheap regularizers actually help a small bag-of-embeddings text classifier when labels are scarce, and why, rather than collecting another leaderboard point.",
+  "hunches": [
+   "Word dropout helps mostly because it stops the model from leaning on a few topic-specific tokens, not because it acts like generic noise.",
+   "Part of any reported gain is early stopping in disguise: a regularized model simply peaks later within the same epoch budget."
+  ],
+  "avoid": [
+   "Pretrained encoders or external data",
+   "Pure hyperparameter sweeps with no mechanism behind them"
+  ],
+  "contribution": "A mechanism claim with a matched control; a clean negative result is welcome.",
+  "known": [
+   "A logistic-regression baseline reaches about 13.3% error on this split"
+  ]
+ },
+ "literature": {
+  "papers": 20,
+  "themes": [
+   "Strong non-neural baselines for sparse BoW features",
+   "Learning from limited labels via structure or pretraining",
+   "Fair comparison and tuning-budget methodology",
+   "Architecture and capacity control",
+   "Off-topic entries"
+  ],
+  "gaps": 5
+ },
+ "directions": [
+  {
+   "name": "Targeted versus random word dropout",
+   "stance": "develops",
+   "chosen": false
+  },
+  {
+   "name": "Is it just later peaking? Best-epoch-matched comparison",
+   "stance": "challenges",
+   "chosen": false
+  },
+  {
+   "name": "Token-structured versus matched generic noise",
+   "stance": "challenges",
+   "chosen": false
+  },
+  {
+   "name": "Width versus explicit regularization: substitutes or stack?",
+   "stance": "outside",
+   "chosen": false
+  },
+  {
+   "name": "Boosting-style regularizers transferred to a neural bag-of-words...",
+   "stance": "develops",
+   "chosen": true
+  }
+ ],
+ "own_directions": [],
+ "ideas": [
+  {
+   "title": "Targeted vs anti-targeted word dropout at matched drop rate: testing whether column subsampling helps by breaking reliance on a few topic tokens",
+   "elo": 1259.6,
+   "picked": false
+  },
+  {
+   "title": "Informativeness-targeted vs anti-targeted word dropout at matched drop rate: does word dropout work by breaking reliance on topic-keyword shortcuts?",
+   "elo": 1227.7,
+   "picked": false
+  },
+  {
+   "title": "Salience-targeted versus anti-targeted vocabulary-column dropout at matched drop rate: a direct test of H1",
+   "elo": 1200.0,
+   "picked": false
+  },
+  {
+   "title": "Row-wise L1 shrinkage on embeddings vs frequency-matched hard vocabulary pruning: is embedding sparsity a learned regularizer or just vocabulary truncation?",
+   "elo": 1170.4,
+   "picked": false
+  },
+  {
+   "title": "Proximal L1 row shrinkage of embeddings versus a frequency-matched vocabulary-pruning control",
+   "elo": 1142.3,
+   "picked": false
+  },
+  {
+   "title": "XGBoost-style column subsampling and L1 shrinkage transferred to neural BoW",
+   "elo": null,
+   "picked": true
+  }
+ ],
+ "selection": {
+  "action": "select",
+  "idea_ids": [
+   "idea_4c4ded55c988d195eea69fe5"
+  ],
+  "actor": "local-user",
+  "kind": "human",
+  "reason": "Selected after inspecting the candidate list",
+  "timestamp": 1794701429.605396,
+  "pilot_protocol_ids": [],
+  "pilot_observation_hash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+ },
+ "experiments": [
+  {
+   "id": "exp_0001",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 13.0625,
+   "protocol": null
+  },
+  {
+   "id": "exp_0002",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "discarded",
+   "value": 16.1875,
+   "protocol": null
+  },
+  {
+   "id": "exp_0003",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "discarded",
+   "value": 13.9375,
+   "protocol": null
+  },
+  {
+   "id": "exp_0004",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 12.3542,
+   "protocol": null
+  },
+  {
+   "id": "exp_0005",
+   "fidelity": [
+    "full"
+   ],
+   "verdict": "kept",
+   "value": 12.6875,
+   "protocol": null
+  },
+  {
+   "id": "exp_0006",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "discarded",
+   "value": 13.3125,
+   "protocol": null
+  },
+  {
+   "id": "exp_0007",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "discarded",
+   "value": 14.5417,
+   "protocol": null
+  },
+  {
+   "id": "exp_0008",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "discarded",
+   "value": 13.9375,
+   "protocol": null
+  },
+  {
+   "id": "exp_0010",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 12.1875,
+   "protocol": null
+  },
+  {
+   "id": "exp_0009",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 12.1875,
+   "protocol": null
+  },
+  {
+   "id": "exp_0011",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 12.1042,
+   "protocol": null
+  },
+  {
+   "id": "exp_0012",
+   "fidelity": [
+    "full"
+   ],
+   "verdict": "kept",
+   "value": 12.55,
+   "protocol": null
+  },
+  {
+   "id": "exp_0013",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 12.0833,
+   "protocol": null
+  },
+  {
+   "id": "exp_0014",
+   "fidelity": [
+    "full"
+   ],
+   "verdict": "kept",
+   "value": 12.55,
+   "protocol": null
+  },
+  {
+   "id": "exp_0015",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "discarded",
+   "value": 13.7708,
+   "protocol": null
+  },
+  {
+   "id": "exp_0016",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 11.75,
+   "protocol": null
+  },
+  {
+   "id": "exp_0017",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 11.9375,
+   "protocol": null
+  },
+  {
+   "id": "exp_0018",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 11.9375,
+   "protocol": null
+  },
+  {
+   "id": "exp_0019",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 11.5833,
+   "protocol": null
+  },
+  {
+   "id": "exp_0020",
+   "fidelity": [
+    "full"
+   ],
+   "verdict": "kept",
+   "value": 12.025,
+   "protocol": null
+  },
+  {
+   "id": "exp_0021",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 11.8542,
+   "protocol": null
+  },
+  {
+   "id": "exp_0022",
+   "fidelity": [
+    "full"
+   ],
+   "verdict": "kept",
+   "value": 11.8875,
+   "protocol": null
+  },
+  {
+   "id": "exp_0023",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 11.8542,
+   "protocol": null
+  },
+  {
+   "id": "exp_0024",
+   "fidelity": [
+    "full"
+   ],
+   "verdict": "kept",
+   "value": 11.8875,
+   "protocol": null
+  },
+  {
+   "id": "exp_0025",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 12.25,
+   "protocol": null
+  },
+  {
+   "id": "exp_0027",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 12.1875,
+   "protocol": null
+  },
+  {
+   "id": "exp_0026",
+   "fidelity": [
+    "smoke"
+   ],
+   "verdict": "kept",
+   "value": 12.0,
+   "protocol": null
+  },
+  {
+   "id": "exp_0028",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 11.875,
+   "protocol": null
+  },
+  {
+   "id": "exp_0029",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 11.9375,
+   "protocol": null
+  },
+  {
+   "id": "exp_0030",
+   "fidelity": [
+    "verify"
+   ],
+   "verdict": "kept",
+   "value": 12.125,
+   "protocol": null
+  }
+ ],
+ "metric": "val_top1_err",
+ "review_rounds": [
+  {
+   "round": 1,
+   "status": "NEEDS_REFRAMING",
+   "critics_reported": 4,
+   "new_issues": {
+    "blocker": 0,
+    "major": 5,
+    "minor": 21
+   },
+   "open_issues": 26,
+   "author_approvals": 0
+  },
+  {
+   "round": 2,
+   "status": "READY_FOR_AUTHOR",
+   "critics_reported": 4,
+   "new_issues": {
+    "blocker": 0,
+    "major": 0,
+    "minor": 0
+   },
+   "open_issues": 0,
+   "author_approvals": 0
+  },
+  {
+   "round": 2,
+   "status": "READY_TO_WRITE",
+   "critics_reported": 4,
+   "new_issues": {
+    "blocker": 0,
+    "major": 0,
+    "minor": 0
+   },
+   "open_issues": 0,
+   "author_approvals": 1
+  }
+ ],
+ "release": {
+  "review_hash": "b7538c1ecd6fbc48eb95a9b138ad4dfd32f98837721d33ba23533a97c8f539e5",
+  "input_hash": "dcd9b16331033e55afba4701c569f7bf11aa55e78cb7721240abe31a1051a69c",
+  "author_decision": {
+   "actor": "Renee Jia",
+   "kind": "human",
+   "decision": "approve_writing",
+   "review_hash": "b7538c1ecd6fbc48eb95a9b138ad4dfd32f98837721d33ba23533a97c8f539e5",
+   "timestamp": 1794703826.8738718
+  }
+ },
+ "dossier": {
+  "argument": {
+   "question": "For a small bag-of-embeddings classifier trained on a 10k-article AG News subset, which of three XGBoost-derived regularizers lowers validation top-1 error relative to a matched ablation: per-step vocabulary-column dropout, group-L1 on embedding rows, or shrinkage implemented as a low-lr long schedule with EMA weight averaging?",
+   "method_summary": "A frozen scorer defines the data, the hashed-token mean-of-embeddings model and validation top-1 error; only the training script is edited. Arms add transferred mechanisms to the stock script. Most comparisons pair an arm with an ablation that removes one mechanism, at the same configuration and seed-fold pairs. Two comparisons do not: column dropout plus group-L1 against the stock control, and two column-drop configurations that differ in both drop rate and group-L1. Runs proceed through smoke, verify and full tiers, and later tiers reuse earlier seeds. Two high-capacity bundles without matched controls are reported as uninterpretable. No arm was scored on the held-out test split.",
+   "claims": [
+    {
+     "id": "claim_coldrop_vs_control",
+     "text": "On seed-fold pairs zero to two, the column-drop-only arm scored 12.0833 validation error (per fold 12.1875, 11.875, 12.1875). The unregularized control at the same configuration scored 13.7708 (13.9375, 13.5, 13.875), and its single-seed smoke run gave 13.9375. Column dropout was lower on every one of the three folds.",
+     "kind": "comparison",
+     "evidence": [
+      "exp_0013",
+      "exp_0015",
+      "exp_0008"
+     ],
+     "measurements": [
+      "exp_0013::val_top1_err.verify",
+      "exp_0015::val_top1_err.verify",
+      "exp_0008::val_top1_err.smoke"
+     ],
+     "depends_on": [],
+     "scope": "Default 64/64 depth-1 configuration, 8 epochs, folds zero to two only, AG News 10k subset, validation split."
+    },
+    {
+     "id": "claim_coldrop_l1_vs_control",
+     "text": "On the same three seed-fold pairs, the column-drop plus group-L1 arm scored 12.3542 (per fold 13.0625, 12.0, 12.0), and its smoke run gave 13.0625. The control scored 13.7708 (13.9375, 13.5, 13.875), so this arm was also lower on every fold.",
+     "kind": "comparison",
+     "evidence": [
+      "exp_0004",
+      "exp_0001",
+      "exp_0015"
+     ],
+     "measurements": [
+      "exp_0004::val_top1_err.verify",
+      "exp_0001::val_top1_err.smoke",
+      "exp_0015::val_top1_err.verify"
+     ],
+     "depends_on": [],
+     "scope": "Default configuration, folds zero to two, validation split."
+    },
+    {
+     "id": "claim_full_tier_coldrop",
+     "text": "Over five seed-fold pairs, the column-drop plus group-L1 arm scored 12.6875 (std 0.6673; per seed 13.0625, 12.0, 12.0, 12.875, 13.5). The column-drop-only arm scored 12.55 (std 0.7634; 12.1875, 11.875, 12.1875, 12.6875, 13.8125). The column-drop plus weak group-L1 arm scored 12.55 (std 0.724). The first two column-drop configurations, which differ in both drop rate and group-L1, showed no consistent ordering across seeds.",
+     "kind": "observation",
+     "evidence": [
+      "exp_0005",
+      "exp_0014",
+      "exp_0012"
+     ],
+     "measurements": [
+      "exp_0005::val_top1_err.full",
+      "exp_0014::val_top1_err.full",
+      "exp_0012::val_top1_err.full"
+     ],
+     "depends_on": [],
+     "scope": "Default configuration, five folds. No five-seed control exists for this comparison."
+    },
+    {
+     "id": "claim_group_l1_default_null",
+     "text": "At the default schedule, adding weak group-L1 to column dropout left the five-seed mean unchanged: 12.55 with the penalty and 12.55 without it. Per-seed values differed only at seed one (11.9375 vs 11.875) and seed four (13.75 vs 13.8125). The verify tier gave 12.1042 with the penalty and 12.0833 without it. The smoke runs of both arms gave 12.1875.",
+     "kind": "comparison",
+     "evidence": [
+      "exp_0012",
+      "exp_0014",
+      "exp_0011",
+      "exp_0013",
+      "exp_0009",
+      "exp_0010"
+     ],
+     "measurements": [
+      "exp_0012::val_top1_err.full",
+      "exp_0014::val_top1_err.full",
+      "exp_0011::val_top1_err.verify",
+      "exp_0013::val_top1_err.verify",
+      "exp_0009::val_top1_err.smoke",
+      "exp_0010::val_top1_err.smoke"
+     ],
+     "depends_on": [],
+     "scope": "Default configuration, column dropout held fixed, weakest group-L1 coefficient tested."
+    },
+    {
+     "id": "claim_group_l1_long_null",
+     "text": "On top of the long-schedule EMA recipe (11.8542; per fold 11.9375, 11.625, 12.0), dense group-L1 scored 11.875 (12.0, 11.6875, 11.9375; smoke 12.0). Lazy group-L1 on batch-active rows at a larger coefficient scored 11.9375 (12.1875, 11.75, 11.875; smoke 12.1875). Neither penalty lowered error consistently across the three folds.",
+     "kind": "comparison",
+     "evidence": [
+      "exp_0028",
+      "exp_0029",
+      "exp_0021",
+      "exp_0026",
+      "exp_0027"
+     ],
+     "measurements": [
+      "exp_0028::val_top1_err.verify",
+      "exp_0029::val_top1_err.verify",
+      "exp_0021::val_top1_err.verify",
+      "exp_0026::val_top1_err.smoke",
+      "exp_0027::val_top1_err.smoke"
+     ],
+     "depends_on": [],
+     "scope": "Long-schedule EMA recipe with column dropout, folds zero to two."
+    },
+    {
+     "id": "claim_ema_default",
+     "text": "At the default lr and epoch budget with column dropout, saving EMA-averaged weights gave a five-seed error of 12.025 (11.75, 11.125, 11.875, 11.75, 13.625), against 12.55 (12.1875, 11.875, 12.1875, 12.6875, 13.8125) without averaging. EMA was lower on all five seed-fold pairs. The verify tier gave 11.5833 and the smoke run 11.75.",
+     "kind": "comparison",
+     "evidence": [
+      "exp_0020",
+      "exp_0014",
+      "exp_0019",
+      "exp_0016"
+     ],
+     "measurements": [
+      "exp_0020::val_top1_err.full",
+      "exp_0014::val_top1_err.full",
+      "exp_0019::val_top1_err.verify",
+      "exp_0016::val_top1_err.smoke"
+     ],
+     "depends_on": [],
+     "scope": "Default configuration, column-drop-only code, EMA as the only change."
+    },
+    {
+     "id": "claim_ema_long",
+     "text": "At the halved lr and doubled epoch budget with column dropout, EMA weights scored 11.8542 (11.9375, 11.625, 12.0; smoke 11.9375). The same schedule without EMA scored 12.125 (12.25, 11.6875, 12.4375; smoke 12.25). EMA was lower on each of the three folds.",
+     "kind": "comparison",
+     "evidence": [
+      "exp_0021",
+      "exp_0030",
+      "exp_0017",
+      "exp_0025"
+     ],
+     "measurements": [
+      "exp_0021::val_top1_err.verify",
+      "exp_0030::val_top1_err.verify",
+      "exp_0017::val_top1_err.smoke",
+      "exp_0025::val_top1_err.smoke"
+     ],
+     "depends_on": [],
+     "scope": "Long-schedule configuration, folds zero to two."
+    },
+    {
+     "id": "claim_schedule_null",
+     "text": "The low-lr long schedule gave no consistent gain over the default schedule. With EMA, it scored 11.8875 over five seeds (11.9375, 11.625, 12.0, 10.8125, 13.0625) against 12.025 (11.75, 11.125, 11.875, 11.75, 13.625). It was higher on seeds zero to two and lower on seeds three and four. Without EMA, it scored 12.125 (12.25, 11.6875, 12.4375) against 12.0833 (12.1875, 11.875, 12.1875), which is mixed.",
+     "kind": "comparison",
+     "evidence": [
+      "exp_0022",
+      "exp_0020",
+      "exp_0030",
+      "exp_0013"
+     ],
+     "measurements": [
+      "exp_0022::val_top1_err.full",
+      "exp_0020::val_top1_err.full",
+      "exp_0030::val_top1_err.verify",
+      "exp_0013::val_top1_err.verify"
+     ],
+     "depends_on": [],
+     "scope": "64/64 depth-1 model with column dropout; schedule varied with EMA presence held fixed."
+    },
+    {
+     "id": "claim_ema_cap_identity",
+     "text": "Two implementations of the long-schedule EMA recipe produced identical per-seed errors: verify 11.8542 in both, and five-seed 11.8875 in both. They differ only in the EMA decay cap.",
+     "kind": "observation",
+     "evidence": [
+      "exp_0021",
+      "exp_0023",
+      "exp_0022",
+      "exp_0024",
+      "97908ac0a654136db7de257a8bc70c2af303f0403c583b6ad68842fee775a3d9",
+      "0c6bf992b1149fd2c3c085bbf9e823b850f05575113379ff88dd7055c447d375"
+     ],
+     "measurements": [
+      "exp_0021::val_top1_err.verify",
+      "exp_0023::val_top1_err.verify",
+      "exp_0022::val_top1_err.full",
+      "exp_0024::val_top1_err.full"
+     ],
+     "depends_on": [],
+     "scope": "Long-schedule EMA recipe with the warmup decay schedule."
+    },
+    {
+     "id": "claim_ema_warmup_mechanism",
+     "text": "The cap never binds in these runs. The step count is fixed by the recorded pool size, the five-fold split, the batch size and the epoch budget, and at that step count the warmup term of the decay schedule stays below either cap for the whole run. The averaging that helped is therefore governed by the warmup schedule, whose effective window is shorter than the nominal cap implies.",
+     "kind": "mechanism",
+     "evidence": [
+      "exp_0023",
+      "exp_0021",
+      "exp_0019",
+      "0c6bf992b1149fd2c3c085bbf9e823b850f05575113379ff88dd7055c447d375",
+      "97908ac0a654136db7de257a8bc70c2af303f0403c583b6ad68842fee775a3d9",
+      "scorer",
+      "train"
+     ],
+     "measurements": [],
+     "depends_on": [
+      "claim_ema_cap_identity",
+      "claim_ema_default"
+     ],
+     "scope": "EMA arms that use the warmup decay schedule at 8 or 16 epochs."
+    },
+    {
+     "id": "claim_fold_four",
+     "text": "In every five-seed arm, the seed-four/fold-four pair had the highest error: 13.5, 13.8125, 13.75, 13.625 and 13.0625. Each five-seed std (0.6673, 0.7634, 0.724, 0.9412, 0.8094) exceeds the three-seed std of the same arm on seeds zero to two.",
+     "kind": "observation",
+     "evidence": [
+      "exp_0005",
+      "exp_0014",
+      "exp_0012",
+      "exp_0020",
+      "exp_0022",
+      "exp_0004",
+      "exp_0013",
+      "exp_0011",
+      "exp_0019",
+      "exp_0021"
+     ],
+     "measurements": [
+      "exp_0005::val_top1_err.full",
+      "exp_0014::val_top1_err.full",
+      "exp_0012::val_top1_err.full",
+      "exp_0020::val_top1_err.full",
+      "exp_0022::val_top1_err.full",
+      "exp_0004::val_top1_err.verify",
+      "exp_0013::val_top1_err.verify",
+      "exp_0011::val_top1_err.verify",
+      "exp_0019::val_top1_err.verify",
+      "exp_0021::val_top1_err.verify"
+     ],
+     "depends_on": [],
+     "scope": "Five-seed arms; seed and validation fold are coupled."
+    },
+    {
+     "id": "claim_highcap_bundles",
+     "text": "Two bundles that doubled width, used depth two and combined all three mechanisms scored above both default-capacity column-drop arms on every one of folds zero to two. Bundle A, averaging without warmup, scored 14.5417 (16.1875, 13.3125, 14.125; smoke 16.1875). Bundle B, with warmup, scored 13.3125 (13.9375, 12.5625, 13.4375; smoke 13.9375). The column-drop plus group-L1 arm scored 12.3542 (13.0625, 12.0, 12.0) and the column-drop-only arm 12.0833 (12.1875, 11.875, 12.1875).",
+     "kind": "observation",
+     "evidence": [
+      "exp_0007",
+      "exp_0006",
+      "exp_0002",
+      "exp_0003",
+      "exp_0004",
+      "exp_0013"
+     ],
+     "measurements": [
+      "exp_0007::val_top1_err.verify",
+      "exp_0006::val_top1_err.verify",
+      "exp_0002::val_top1_err.smoke",
+      "exp_0003::val_top1_err.smoke",
+      "exp_0004::val_top1_err.verify",
+      "exp_0013::val_top1_err.verify"
+     ],
+     "depends_on": [],
+     "scope": "128/128 depth-2 configuration against default-capacity column-drop arms, folds zero to two."
+    },
+    {
+     "id": "claim_overall",
+     "text": "In this setting, vocabulary-column dropout lowered validation error against the stock control on all three evaluated folds. Of shrinkage's two parts, EMA weight averaging lowered error against its no-EMA ablation on every evaluated fold, while the low-lr long schedule showed no consistent effect. Group-L1 on embedding rows showed no consistent effect.",
+     "kind": "generalization",
+     "evidence": [
+      "exp_0013",
+      "exp_0015",
+      "exp_0020",
+      "exp_0014",
+      "exp_0021",
+      "exp_0030",
+      "exp_0012",
+      "exp_0028",
+      "exp_0029",
+      "exp_0022"
+     ],
+     "measurements": [],
+     "depends_on": [
+      "claim_coldrop_vs_control",
+      "claim_ema_default",
+      "claim_ema_long",
+      "claim_group_l1_default_null",
+      "claim_group_l1_long_null",
+      "claim_schedule_null"
+     ],
+     "scope": "One hashed-vocabulary bag-of-embeddings model on one AG News 10k subset, validation folds only, untuned default control."
+    }
+   ],
+   "limitations": [
+    "The unregularized control ran only on seed-fold pairs zero to two. The column-dropout effect therefore rests on three folds, and no five-seed control exists.",
+    "Seed index and validation fold are coupled, so seed variance mixes initialisation noise with fold difficulty. Fold four is consistently hardest.",
+    "Verify and full tiers reuse the seeds of earlier tiers. They are nested subsets, not independent replicates.",
+    "Each comparison is a sign pattern over three or five folds. No significance test or confidence interval was computed.",
+    "Per-fold errors move in steps of one validation article. One of the three long-schedule EMA margins, at fold one, is a single article, so that comparison is weak on its own; the five-fold default-schedule EMA comparison carries most of the weight.",
+    "All arms were selected and compared on validation folds. The held-out test split was never scored, so selection bias toward validation noise is possible.",
+    "The planned comparison against hidden dropout plus weight decay, tuned with an equal trial budget, never ran. Column dropout may act as generic regularization rather than a word-specific effect. The control used the default configuration and was not tuned for its own arm.",
+    "The two default-schedule column-drop configurations change drop rate and group-L1 together. Dose-response in the drop rate was not measured.",
+    "EMA effects are compared across separate runs, not as raw versus averaged weights from the same run. Step counts were not logged; the claim that the decay cap never binds is derived from the recorded fold size, batch size and epochs, not measured.",
+    "Under the warmup EMA, the averaging window grows with step count, so the with-EMA schedule comparison changes the averaging window and doubles the steps along with lr and epochs. The no-EMA pair, long schedule against the column-drop-only arm, is the schedule-only contrast.",
+    "No mechanism measurements were taken: no train/validation gap, learning curves, per-token reliance or embedding-row norms. Two hypotheses remain untested: that gains are early stopping in disguise, and that dropout prevents reliance on topic tokens.",
+    "The group-L1 null may reflect coefficients too small relative to the coupled Adam weight decay, or Adam rescaling the penalty. Neither possibility was checked.",
+    "The high-capacity bundles confound capacity, lr, epochs, drop rate and EMA variant, and no capacity-matched control ran, so neither result can be attributed to any mechanism. One averaged from initialisation without warmup, a competing explanation for its high error.",
+    "The logistic-regression baseline quoted in the profile was never run under this protocol and is not directly comparable with any arm.",
+    "Results cover one dataset subset, one small hashed-vocabulary model and short training budgets. Historical code provenance relies on recorded candidate source versions, not execution snapshots."
+   ],
+   "setup": [
+    {
+     "id": "setup_data",
+     "text": "Data are a class-stratified AG News subset built from the Hugging Face copy fancyzhx/ag_news with sampling seed 0: 8,000 training-split articles form the cross-validation pool, and 2,000 official-test articles form a held-out test set.",
+     "evidence": [
+      "scorer"
+     ]
+    },
+    {
+     "id": "setup_tokens",
+     "text": "Text is lower-cased, split on non-alphanumerics and truncated to 64 tokens. Each token is hashed with crc32 modulo 20000, plus 1, into 20,000 buckets, with id 0 as padding.",
+     "evidence": [
+      "scorer"
+     ]
+    },
+    {
+     "id": "setup_model",
+     "text": "The frozen model averages non-padding token embeddings, applies depth ReLU hidden layers of width hidden, and outputs 4 class logits.",
+     "evidence": [
+      "scorer"
+     ]
+    },
+    {
+     "id": "setup_folds",
+     "text": "The pool is cut into 5 stratified folds by StratifiedKFold with shuffling and random_state 0. A run with seed i trains on the remaining folds and is scored on validation fold i, so seeds and folds are paired.",
+     "evidence": [
+      "scorer",
+      "exp_0005"
+     ]
+    },
+    {
+     "id": "setup_metric",
+     "text": "The metric is top-1 error in percent on the validation fold, and lower is better. No run scored the held-out test split.",
+     "evidence": [
+      "scorer",
+      "profile",
+      "exp_0005"
+     ]
+    },
+    {
+     "id": "setup_tiers",
+     "text": "Smoke runs use one seed with a 120-second budget, verify runs three seeds with 300 seconds, and full runs five seeds with 900 seconds. Later tiers reuse earlier seeds.",
+     "evidence": [
+      "profile",
+      "exp_0004",
+      "exp_0005"
+     ]
+    },
+    {
+     "id": "setup_default",
+     "text": "The default configuration is lr 0.003, embed_dim 64, hidden 64, depth 1, weight_decay 0.0001 and 8 epochs. It uses Adam with coupled weight decay, batch 128 and normal initialisation with std 0.1.",
+     "evidence": [
+      "train",
+      "profile"
+     ]
+    },
+    {
+     "id": "setup_loss",
+     "text": "Every arm trains with cross-entropy loss on the class logits; group-L1, where present, is added to this loss.",
+     "evidence": [
+      "train",
+      "f07c8e86dc90fa4fd07dc8ea0d42770c53ffd7ab5a408b387d05027b11bf1dbd"
+     ]
+    },
+    {
+     "id": "setup_steps",
+     "text": "Each run trains on four of the five folds of the pool with batch 128 for 8 or 16 epochs, so the optimizer step count is fixed by the configuration.",
+     "evidence": [
+      "scorer",
+      "train",
+      "0c6bf992b1149fd2c3c085bbf9e823b850f05575113379ff88dd7055c447d375"
+     ]
+    },
+    {
+     "id": "setup_mask",
+     "text": "Column dropout draws one Bernoulli keep mask over the vocabulary per step, shared across the batch, and maps dropped ids to padding id 0. A row that would be fully masked keeps its original ids. The two high-capacity bundles lack this fallback.",
+     "evidence": [
+      "f07c8e86dc90fa4fd07dc8ea0d42770c53ffd7ab5a408b387d05027b11bf1dbd",
+      "a8276a911760d2787452432f590718947d828985c203339096fc767f8a3ce15d",
+      "c5a5c60f852c746d232a1532c64cac3a528be9696437a39f03253af15b6ad864",
+      "b61cfee4b2c9d4df9e8b80060f0a7fdea48531cdcc988f9ba3b56d4ea2029df3"
+     ]
+    },
+    {
+     "id": "setup_control",
+     "text": "The control arm runs the unmodified training script at the default configuration, with no column dropout, group-L1 or averaging.",
+     "evidence": [
+      "2a8bff2e12176fac283375e32ed76c004d77bb5de63fd39af9ef3cf0e8d32d2d",
+      "exp_0015"
+     ]
+    },
+    {
+     "id": "setup_coldrop_l1",
+     "text": "The column-drop plus group-L1 arm uses drop rate 0.25 at each step and adds group-L1 at 1e-5 on the sum of embedding-row L2 norms, excluding the padding row.",
+     "evidence": [
+      "exp_0001",
+      "f07c8e86dc90fa4fd07dc8ea0d42770c53ffd7ab5a408b387d05027b11bf1dbd"
+     ]
+    },
+    {
+     "id": "setup_coldrop_only",
+     "text": "The column-drop-only arm uses the same code with drop fraction p=0.4 and group-L1 coefficient 0.",
+     "evidence": [
+      "exp_0013",
+      "a8276a911760d2787452432f590718947d828985c203339096fc767f8a3ce15d"
+     ]
+    },
+    {
+     "id": "setup_coldrop_weak_l1",
+     "text": "The column-drop plus weak group-L1 arm uses drop fraction p=0.4 with group-L1 at 1e-6.",
+     "evidence": [
+      "exp_0011",
+      "7977b4ce677a2728596331e84d0e5be0cacf1871899dea2cdb352432deb7393b"
+     ]
+    },
+    {
+     "id": "setup_ema",
+     "text": "The EMA arm adds weight averaging to the column-drop-only arm with decay min(0.999, (1+t)/(10+t)) at step t and saves the EMA weights.",
+     "evidence": [
+      "exp_0019",
+      "9a434a3d44458554aeb8cd9995701d2b5d4369200caefe848ce449671ce641a2"
+     ]
+    },
+    {
+     "id": "setup_long_ema",
+     "text": "The long-schedule EMA arm uses lr 0.0015, 16 epochs, drop fraction p=0.4 and group-L1 0. Both implementations use EMA decay min(cap, (1+t)/(10+t)), the same warmup form as the default-schedule EMA arm, with cap 0.999 in one and 0.995 in the other, and save the EMA weights.",
+     "evidence": [
+      "exp_0021",
+      "exp_0023",
+      "0c6bf992b1149fd2c3c085bbf9e823b850f05575113379ff88dd7055c447d375",
+      "97908ac0a654136db7de257a8bc70c2af303f0403c583b6ad68842fee775a3d9"
+     ]
+    },
+    {
+     "id": "setup_long_noema",
+     "text": "The long-schedule no-EMA arm uses lr 0.0015, 16 epochs, drop fraction p=0.4 and group-L1 0, and saves raw final weights.",
+     "evidence": [
+      "exp_0030",
+      "5795924c692ac96d52747e3188d9a763effbf23763d90e9ef2c1b08bdbc269b5"
+     ]
+    },
+    {
+     "id": "setup_long_l1",
+     "text": "Two group-L1 arms keep the long-schedule EMA recipe (lr 0.0015, 16 epochs, p=0.4, warmup EMA capped at 0.999). One adds dense group-L1 at 1e-5 on all non-padding embedding rows. The other adds lazy group-L1 at 1e-4 only on rows active in each batch.",
+     "evidence": [
+      "exp_0028",
+      "exp_0029",
+      "9f89c30dc29456181a948b1806cb5352c853d60a5b477240cf83ecf192cf402b",
+      "15e6062617e1ddc7657c30315c13f75d1e167b4dcb48475a0793aa8012bc2c69"
+     ]
+    },
+    {
+     "id": "setup_highcap_a",
+     "text": "High-capacity bundle A uses embed_dim 128, hidden 128, depth 2, lr 0.0015, weight_decay 5e-05 and 16 epochs. It adds column dropout p=0.3, group-L1 1e-5 and EMA at decay 0.999 without warmup.",
+     "evidence": [
+      "exp_0007",
+      "c5a5c60f852c746d232a1532c64cac3a528be9696437a39f03253af15b6ad864"
+     ]
+    },
+    {
+     "id": "setup_highcap_b",
+     "text": "High-capacity bundle B uses the same configuration with column dropout p=0.25, group-L1 1e-5 and EMA decay 0.999 with warmup.",
+     "evidence": [
+      "exp_0006",
+      "b61cfee4b2c9d4df9e8b80060f0a7fdea48531cdcc988f9ba3b56d4ea2029df3"
+     ]
+    },
+    {
+     "id": "setup_runs",
+     "text": "Thirty registered runs over twelve candidate configurations all completed with a recorded validation score; none failed or were excluded. Twelve are smoke runs, twelve are verify runs and six are full-tier runs.",
+     "evidence": [
+      "exp_0001",
+      "exp_0002",
+      "exp_0003",
+      "exp_0004",
+      "exp_0005",
+      "exp_0006",
+      "exp_0007",
+      "exp_0008",
+      "exp_0009",
+      "exp_0010",
+      "exp_0011",
+      "exp_0012",
+      "exp_0013",
+      "exp_0014",
+      "exp_0015",
+      "exp_0016",
+      "exp_0017",
+      "exp_0018",
+      "exp_0019",
+      "exp_0020",
+      "exp_0021",
+      "exp_0022",
+      "exp_0023",
+      "exp_0024",
+      "exp_0025",
+      "exp_0026",
+      "exp_0027",
+      "exp_0028",
+      "exp_0029",
+      "exp_0030"
+     ]
+    }
+   ],
+   "related_work": [
+    {
+     "id": "related_xgboost",
+     "text": "XGBoost is a scalable tree-boosting system whose regularized objective uses leaf-count and L2 leaf-weight penalties, alongside shrinkage and column subsampling; it reports no text benchmarks. This study transfers column subsampling and shrinkage to a neural bag-of-embeddings model and adds group-L1 on embedding rows as its own L1-style analogue, ablating each separately.",
+     "papers": [
+      "arXiv:1603.02754"
+     ]
+    },
+    {
+     "id": "related_tuning_bias",
+     "text": "That work demonstrates, in connectome-constrained circuit models, that comparisons are biased when baselines are under-tuned or inherit parameters tuned for the favoured model, and names the machine-learning analogues. By analogy, the same caution applies here, because the control shares an untuned default configuration with the treatments.",
+     "papers": [
+      "arXiv:2611.14508v1"
+     ]
+    },
+    {
+     "id": "related_single_baseline",
+     "text": "That study cautions against relying on a single, unjustified task-specific baseline. The control here is likewise one default-configuration model and not a tuned alternative regularizer.",
+     "papers": [
+      "arXiv:2611.14519v1"
+     ]
+    },
+    {
+     "id": "related_width",
+     "text": "That paper treats width multipliers as a capacity-accuracy trade-off in vision. This study varied width only inside confounded high-capacity bundles and does not isolate capacity.",
+     "papers": [
+      "arXiv:1704.04861"
+     ]
+    }
+   ]
+  },
+  "measurements": {
+   "exp_0001::val_top1_err.smoke": {
+    "run_id": "exp_0001",
+    "key": "val_top1_err.smoke",
+    "value": 13.0625,
+    "seeds": [
+     13.0625
+    ],
+    "std": 0.0
+   },
+   "exp_0002::val_top1_err.smoke": {
+    "run_id": "exp_0002",
+    "key": "val_top1_err.smoke",
+    "value": 16.1875,
+    "seeds": [
+     16.1875
+    ],
+    "std": 0.0
+   },
+   "exp_0003::val_top1_err.smoke": {
+    "run_id": "exp_0003",
+    "key": "val_top1_err.smoke",
+    "value": 13.9375,
+    "seeds": [
+     13.9375
+    ],
+    "std": 0.0
+   },
+   "exp_0004::val_top1_err.verify": {
+    "run_id": "exp_0004",
+    "key": "val_top1_err.verify",
+    "value": 12.3542,
+    "seeds": [
+     13.0625,
+     12.0,
+     12.0
+    ],
+    "std": 0.6134,
+    "median": 12.0,
+    "seed_sd": 0.613435
+   },
+   "exp_0005::val_top1_err.full": {
+    "run_id": "exp_0005",
+    "key": "val_top1_err.full",
+    "value": 12.6875,
+    "seeds": [
+     13.0625,
+     12.0,
+     12.0,
+     12.875,
+     13.5
+    ],
+    "std": 0.6673,
+    "median": 12.875,
+    "seed_sd": 0.667317
+   },
+   "exp_0006::val_top1_err.verify": {
+    "run_id": "exp_0006",
+    "key": "val_top1_err.verify",
+    "value": 13.3125,
+    "seeds": [
+     13.9375,
+     12.5625,
+     13.4375
+    ],
+    "std": 0.696,
+    "median": 13.4375,
+    "seed_sd": 0.695971
+   },
+   "exp_0007::val_top1_err.verify": {
+    "run_id": "exp_0007",
+    "key": "val_top1_err.verify",
+    "value": 14.5417,
+    "seeds": [
+     16.1875,
+     13.3125,
+     14.125
+    ],
+    "std": 1.4821,
+    "median": 14.125,
+    "seed_sd": 1.482098
+   },
+   "exp_0008::val_top1_err.smoke": {
+    "run_id": "exp_0008",
+    "key": "val_top1_err.smoke",
+    "value": 13.9375,
+    "seeds": [
+     13.9375
+    ],
+    "std": 0.0
+   },
+   "exp_0010::val_top1_err.smoke": {
+    "run_id": "exp_0010",
+    "key": "val_top1_err.smoke",
+    "value": 12.1875,
+    "seeds": [
+     12.1875
+    ],
+    "std": 0.0
+   },
+   "exp_0009::val_top1_err.smoke": {
+    "run_id": "exp_0009",
+    "key": "val_top1_err.smoke",
+    "value": 12.1875,
+    "seeds": [
+     12.1875
+    ],
+    "std": 0.0
+   },
+   "exp_0011::val_top1_err.verify": {
+    "run_id": "exp_0011",
+    "key": "val_top1_err.verify",
+    "value": 12.1042,
+    "seeds": [
+     12.1875,
+     11.9375,
+     12.1875
+    ],
+    "std": 0.1443,
+    "median": 12.1875,
+    "seed_sd": 0.144338
+   },
+   "exp_0012::val_top1_err.full": {
+    "run_id": "exp_0012",
+    "key": "val_top1_err.full",
+    "value": 12.55,
+    "seeds": [
+     12.1875,
+     11.9375,
+     12.1875,
+     12.6875,
+     13.75
+    ],
+    "std": 0.724,
+    "median": 12.1875,
+    "seed_sd": 0.72403
+   },
+   "exp_0013::val_top1_err.verify": {
+    "run_id": "exp_0013",
+    "key": "val_top1_err.verify",
+    "value": 12.0833,
+    "seeds": [
+     12.1875,
+     11.875,
+     12.1875
+    ],
+    "std": 0.1804,
+    "median": 12.1875,
+    "seed_sd": 0.180422
+   },
+   "exp_0014::val_top1_err.full": {
+    "run_id": "exp_0014",
+    "key": "val_top1_err.full",
+    "value": 12.55,
+    "seeds": [
+     12.1875,
+     11.875,
+     12.1875,
+     12.6875,
+     13.8125
+    ],
+    "std": 0.7634,
+    "median": 12.1875,
+    "seed_sd": 0.763422
+   },
+   "exp_0015::val_top1_err.verify": {
+    "run_id": "exp_0015",
+    "key": "val_top1_err.verify",
+    "value": 13.7708,
+    "seeds": [
+     13.9375,
+     13.5,
+     13.875
+    ],
+    "std": 0.2366,
+    "median": 13.875,
+    "seed_sd": 0.236621
+   },
+   "exp_0016::val_top1_err.smoke": {
+    "run_id": "exp_0016",
+    "key": "val_top1_err.smoke",
+    "value": 11.75,
+    "seeds": [
+     11.75
+    ],
+    "std": 0.0
+   },
+   "exp_0017::val_top1_err.smoke": {
+    "run_id": "exp_0017",
+    "key": "val_top1_err.smoke",
+    "value": 11.9375,
+    "seeds": [
+     11.9375
+    ],
+    "std": 0.0
+   },
+   "exp_0018::val_top1_err.smoke": {
+    "run_id": "exp_0018",
+    "key": "val_top1_err.smoke",
+    "value": 11.9375,
+    "seeds": [
+     11.9375
+    ],
+    "std": 0.0
+   },
+   "exp_0019::val_top1_err.verify": {
+    "run_id": "exp_0019",
+    "key": "val_top1_err.verify",
+    "value": 11.5833,
+    "seeds": [
+     11.75,
+     11.125,
+     11.875
+    ],
+    "std": 0.4018,
+    "median": 11.75,
+    "seed_sd": 0.401819
+   },
+   "exp_0020::val_top1_err.full": {
+    "run_id": "exp_0020",
+    "key": "val_top1_err.full",
+    "value": 12.025,
+    "seeds": [
+     11.75,
+     11.125,
+     11.875,
+     11.75,
+     13.625
+    ],
+    "std": 0.9412,
+    "median": 11.75,
+    "seed_sd": 0.941243
+   },
+   "exp_0021::val_top1_err.verify": {
+    "run_id": "exp_0021",
+    "key": "val_top1_err.verify",
+    "value": 11.8542,
+    "seeds": [
+     11.9375,
+     11.625,
+     12.0
+    ],
+    "std": 0.2009,
+    "median": 11.9375,
+    "seed_sd": 0.200909
+   },
+   "exp_0022::val_top1_err.full": {
+    "run_id": "exp_0022",
+    "key": "val_top1_err.full",
+    "value": 11.8875,
+    "seeds": [
+     11.9375,
+     11.625,
+     12.0,
+     10.8125,
+     13.0625
+    ],
+    "std": 0.8094,
+    "median": 11.9375,
+    "seed_sd": 0.809369
+   },
+   "exp_0023::val_top1_err.verify": {
+    "run_id": "exp_0023",
+    "key": "val_top1_err.verify",
+    "value": 11.8542,
+    "seeds": [
+     11.9375,
+     11.625,
+     12.0
+    ],
+    "std": 0.2009,
+    "median": 11.9375,
+    "seed_sd": 0.200909
+   },
+   "exp_0024::val_top1_err.full": {
+    "run_id": "exp_0024",
+    "key": "val_top1_err.full",
+    "value": 11.8875,
+    "seeds": [
+     11.9375,
+     11.625,
+     12.0,
+     10.8125,
+     13.0625
+    ],
+    "std": 0.8094,
+    "median": 11.9375,
+    "seed_sd": 0.809369
+   },
+   "exp_0025::val_top1_err.smoke": {
+    "run_id": "exp_0025",
+    "key": "val_top1_err.smoke",
+    "value": 12.25,
+    "seeds": [
+     12.25
+    ],
+    "std": 0.0
+   },
+   "exp_0027::val_top1_err.smoke": {
+    "run_id": "exp_0027",
+    "key": "val_top1_err.smoke",
+    "value": 12.1875,
+    "seeds": [
+     12.1875
+    ],
+    "std": 0.0
+   },
+   "exp_0026::val_top1_err.smoke": {
+    "run_id": "exp_0026",
+    "key": "val_top1_err.smoke",
+    "value": 12.0,
+    "seeds": [
+     12.0
+    ],
+    "std": 0.0
+   },
+   "exp_0028::val_top1_err.verify": {
+    "run_id": "exp_0028",
+    "key": "val_top1_err.verify",
+    "value": 11.875,
+    "seeds": [
+     12.0,
+     11.6875,
+     11.9375
+    ],
+    "std": 0.1654,
+    "median": 11.9375,
+    "seed_sd": 0.165359
+   },
+   "exp_0029::val_top1_err.verify": {
+    "run_id": "exp_0029",
+    "key": "val_top1_err.verify",
+    "value": 11.9375,
+    "seeds": [
+     12.1875,
+     11.75,
+     11.875
+    ],
+    "std": 0.2253,
+    "median": 11.875,
+    "seed_sd": 0.225347
+   },
+   "exp_0030::val_top1_err.verify": {
+    "run_id": "exp_0030",
+    "key": "val_top1_err.verify",
+    "value": 12.125,
+    "seeds": [
+     12.25,
+     11.6875,
+     12.4375
+    ],
+    "std": 0.3903,
+    "median": 12.25,
+    "seed_sd": 0.390312
+   }
+  },
+  "runs": [
+   {
+    "id": "exp_0001",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "f07c8e86dc90fa4fd07dc8ea0d42770c53ffd7ab5a408b387d05027b11bf1dbd"
+   },
+   {
+    "id": "exp_0002",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "discarded",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 128,
+     "hidden": 128,
+     "depth": 2,
+     "weight_decay": 5e-05,
+     "epochs": 16
+    },
+    "candidate_id": "c5a5c60f852c746d232a1532c64cac3a528be9696437a39f03253af15b6ad864"
+   },
+   {
+    "id": "exp_0003",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "discarded",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 128,
+     "hidden": 128,
+     "depth": 2,
+     "weight_decay": 5e-05,
+     "epochs": 16
+    },
+    "candidate_id": "b61cfee4b2c9d4df9e8b80060f0a7fdea48531cdcc988f9ba3b56d4ea2029df3"
+   },
+   {
+    "id": "exp_0004",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "f07c8e86dc90fa4fd07dc8ea0d42770c53ffd7ab5a408b387d05027b11bf1dbd"
+   },
+   {
+    "id": "exp_0005",
+    "fidelity": [
+     "full"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "f07c8e86dc90fa4fd07dc8ea0d42770c53ffd7ab5a408b387d05027b11bf1dbd"
+   },
+   {
+    "id": "exp_0006",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "discarded",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 128,
+     "hidden": 128,
+     "depth": 2,
+     "weight_decay": 5e-05,
+     "epochs": 16
+    },
+    "candidate_id": "b61cfee4b2c9d4df9e8b80060f0a7fdea48531cdcc988f9ba3b56d4ea2029df3"
+   },
+   {
+    "id": "exp_0007",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "discarded",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 128,
+     "hidden": 128,
+     "depth": 2,
+     "weight_decay": 5e-05,
+     "epochs": 16
+    },
+    "candidate_id": "c5a5c60f852c746d232a1532c64cac3a528be9696437a39f03253af15b6ad864"
+   },
+   {
+    "id": "exp_0008",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "discarded",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "2a8bff2e12176fac283375e32ed76c004d77bb5de63fd39af9ef3cf0e8d32d2d"
+   },
+   {
+    "id": "exp_0010",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "a8276a911760d2787452432f590718947d828985c203339096fc767f8a3ce15d"
+   },
+   {
+    "id": "exp_0009",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "7977b4ce677a2728596331e84d0e5be0cacf1871899dea2cdb352432deb7393b"
+   },
+   {
+    "id": "exp_0011",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "7977b4ce677a2728596331e84d0e5be0cacf1871899dea2cdb352432deb7393b"
+   },
+   {
+    "id": "exp_0012",
+    "fidelity": [
+     "full"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "7977b4ce677a2728596331e84d0e5be0cacf1871899dea2cdb352432deb7393b"
+   },
+   {
+    "id": "exp_0013",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "a8276a911760d2787452432f590718947d828985c203339096fc767f8a3ce15d"
+   },
+   {
+    "id": "exp_0014",
+    "fidelity": [
+     "full"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "a8276a911760d2787452432f590718947d828985c203339096fc767f8a3ce15d"
+   },
+   {
+    "id": "exp_0015",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "discarded",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "2a8bff2e12176fac283375e32ed76c004d77bb5de63fd39af9ef3cf0e8d32d2d"
+   },
+   {
+    "id": "exp_0016",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "9a434a3d44458554aeb8cd9995701d2b5d4369200caefe848ce449671ce641a2"
+   },
+   {
+    "id": "exp_0017",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "0c6bf992b1149fd2c3c085bbf9e823b850f05575113379ff88dd7055c447d375"
+   },
+   {
+    "id": "exp_0018",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "97908ac0a654136db7de257a8bc70c2af303f0403c583b6ad68842fee775a3d9"
+   },
+   {
+    "id": "exp_0019",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "9a434a3d44458554aeb8cd9995701d2b5d4369200caefe848ce449671ce641a2"
+   },
+   {
+    "id": "exp_0020",
+    "fidelity": [
+     "full"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.003,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 8
+    },
+    "candidate_id": "9a434a3d44458554aeb8cd9995701d2b5d4369200caefe848ce449671ce641a2"
+   },
+   {
+    "id": "exp_0021",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "0c6bf992b1149fd2c3c085bbf9e823b850f05575113379ff88dd7055c447d375"
+   },
+   {
+    "id": "exp_0022",
+    "fidelity": [
+     "full"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "0c6bf992b1149fd2c3c085bbf9e823b850f05575113379ff88dd7055c447d375"
+   },
+   {
+    "id": "exp_0023",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "97908ac0a654136db7de257a8bc70c2af303f0403c583b6ad68842fee775a3d9"
+   },
+   {
+    "id": "exp_0024",
+    "fidelity": [
+     "full"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "97908ac0a654136db7de257a8bc70c2af303f0403c583b6ad68842fee775a3d9"
+   },
+   {
+    "id": "exp_0025",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "5795924c692ac96d52747e3188d9a763effbf23763d90e9ef2c1b08bdbc269b5"
+   },
+   {
+    "id": "exp_0027",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "15e6062617e1ddc7657c30315c13f75d1e167b4dcb48475a0793aa8012bc2c69"
+   },
+   {
+    "id": "exp_0026",
+    "fidelity": [
+     "smoke"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "9f89c30dc29456181a948b1806cb5352c853d60a5b477240cf83ecf192cf402b"
+   },
+   {
+    "id": "exp_0028",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "9f89c30dc29456181a948b1806cb5352c853d60a5b477240cf83ecf192cf402b"
+   },
+   {
+    "id": "exp_0029",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "15e6062617e1ddc7657c30315c13f75d1e167b4dcb48475a0793aa8012bc2c69"
+   },
+   {
+    "id": "exp_0030",
+    "fidelity": [
+     "verify"
+    ],
+    "verdict": "kept",
+    "config": {
+     "lr": 0.0015,
+     "embed_dim": 64,
+     "hidden": 64,
+     "depth": 1,
+     "weight_decay": 0.0001,
+     "epochs": 16
+    },
+    "candidate_id": "5795924c692ac96d52747e3188d9a763effbf23763d90e9ef2c1b08bdbc269b5"
+   }
+  ],
+  "papers": {
+   "doi:10.32614/r.manuals": {
+    "title": "R: A Language and Environment for Statistical Computing",
+    "url": "https://doi.org/10.32614/r.manuals"
+   },
+   "arXiv:1506.01497": {
+    "title": "Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks",
+    "url": "http://arxiv.org/abs/1506.01497"
+   },
+   "arXiv:1603.02754": {
+    "title": "XGBoost: A Scalable Tree Boosting System",
+    "url": "http://arxiv.org/abs/1603.02754"
+   },
+   "doi:10.1109/5.726791": {
+    "title": "Gradient-based learning applied to document recognition",
+    "url": "https://doi.org/10.1109/5.726791"
+   },
+   "arXiv:2010.11929": {
+    "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+    "url": "http://arxiv.org/abs/2010.11929"
+   },
+   "doi:10.1038/s41586-021-03819-2": {
+    "title": "Highly accurate protein structure prediction with AlphaFold",
+    "url": "https://doi.org/10.1038/s41586-021-03819-2"
+   },
+   "arXiv:2103.14030": {
+    "title": "Swin Transformer: Hierarchical Vision Transformer using Shifted Windows",
+    "url": "http://arxiv.org/abs/2103.14030"
+   },
+   "arXiv:2303.08774": {
+    "title": "GPT-4 Technical Report",
+    "url": "http://arxiv.org/abs/2303.08774"
+   },
+   "arXiv:1609.02907": {
+    "title": "Semi-Supervised Classification with Graph Convolutional Networks",
+    "url": "http://arxiv.org/abs/1609.02907"
+   },
+   "arXiv:1311.2524": {
+    "title": "Rich Feature Hierarchies for Accurate Object Detection and Semantic Segmentation",
+    "url": "http://arxiv.org/abs/1311.2524"
+   },
+   "arXiv:2005.14165": {
+    "title": "Language Models are Few-Shot Learners",
+    "url": "http://arxiv.org/abs/2005.14165"
+   },
+   "arXiv:1704.04861": {
+    "title": "MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications",
+    "url": "http://arxiv.org/abs/1704.04861"
+   },
+   "arXiv:2407.21783": {
+    "title": "The Llama 3 Herd of Models",
+    "url": "https://arxiv.org/abs/2407.21783"
+   },
+   "arXiv:2302.13971": {
+    "title": "LLaMA: Open and Efficient Foundation Language Models",
+    "url": "http://arxiv.org/abs/2302.13971"
+   },
+   "arXiv:2611.14519v1": {
+    "title": "Medical Image Segmentation: Foundation Model Adaptation versus Task-Specific Training",
+    "url": "http://arxiv.org/abs/2611.14519v1"
+   },
+   "arXiv:2611.14518v1": {
+    "title": "Toward Foundation Detection Models via Example-Based Grounding in EM-DETR",
+    "url": "http://arxiv.org/abs/2611.14518v1"
+   },
+   "arXiv:2611.14514v1": {
+    "title": "Contrastive Discovery: Open-Ended Scientific Discovery over Competing Explanations",
+    "url": "http://arxiv.org/abs/2611.14514v1"
+   },
+   "arXiv:2611.14513v1": {
+    "title": "Online Graph Coloring: Competitive Ratios Separating Randomized and Deterministic Algorithms",
+    "url": "http://arxiv.org/abs/2611.14513v1"
+   },
+   "arXiv:2611.14511v1": {
+    "title": "Pyrite: Building and Benchmarking Protein-Ligand Pose Ranking Agents",
+    "url": "http://arxiv.org/abs/2611.14511v1"
+   },
+   "arXiv:2611.14508v1": {
+    "title": "When Does the Real Wiring Win? Testing connectome structure-function claims against unmeasured physiology",
+    "url": "http://arxiv.org/abs/2611.14508v1"
+   }
+  }
+ },
+ "paper": {
+  "title": "Which XGBoost Regularizers Transfer to a Small Bag-of-Embeddings Text Classifier? In One Small AG News Setting, Column Dropout and EMA Lowered Validation Error; Group-L1 and a Long Schedule Showed No Consistent Effect",
+  "sections": [
+   {
+    "heading": "Abstract",
+    "body": "We ask which of three XGBoost-derived regularizers lowers validation top-1 error, relative to a matched ablation, for a small bag-of-embeddings classifier trained on a 10k-article AG News subset: per-step vocabulary-column dropout, group-L1 on embedding rows, or shrinkage implemented as a low-lr long schedule with EMA weight averaging [scope_question]. In this setting, vocabulary-column dropout lowered validation error against the stock control on all three evaluated folds [claim_overall]. Of shrinkage's two parts, EMA weight averaging lowered error against its no-EMA ablation on every evaluated fold, and the low-lr long schedule showed no consistent effect [claim_overall]. Group-L1 on embedding rows showed no consistent effect [claim_overall]. On seed-fold pairs zero to two, the column-drop-only arm scored 12.0833 validation error against 13.7708 for the unregularized control, and column dropout was lower on every one of the three folds [claim_coldrop_vs_control]. At the default lr and epoch budget with column dropout, saving EMA-averaged weights gave a five-seed error of 12.025 against 12.55 without averaging, and EMA was lower on all five seed-fold pairs [claim_ema_default]. The unregularized control ran only on seed-fold pairs zero to two, so the column-dropout effect rests on three folds and no five-seed control exists [limit_1]."
+   },
+   {
+    "heading": "Introduction",
+    "body": "We study topic classification on AG News with a small bag-of-embeddings classifier trained on a 10k-article subset, and we ask which of three XGBoost-derived regularizers lowers validation top-1 error (lower is better) relative to a matched ablation: per-step vocabulary-column dropout, group-L1 on embedding rows, or shrinkage implemented as a low-lr long schedule with EMA weight averaging [scope_question].\n\nThese regularizers come from tree boosting: XGBoost is a scalable tree-boosting system whose regularized objective uses leaf-count and L2 leaf-weight penalties, alongside shrinkage and column subsampling, and it reports no text benchmarks [related_xgboost]. This study transfers column subsampling and shrinkage to a neural bag-of-embeddings model, adds group-L1 on embedding rows as its own L1-style analogue, and ablates each one separately [related_xgboost].\n\nIn this setting, vocabulary-column dropout lowered validation error against the stock control on all three evaluated folds, and group-L1 on embedding rows showed no consistent effect [claim_overall]. Of shrinkage's two parts, EMA weight averaging lowered error against its no-EMA ablation on every evaluated fold, while the low-lr long schedule showed no consistent effect [claim_overall].\n\nOur first finding is that column dropout lowers error against the unregularized control: on seed-fold pairs zero to two, the column-drop-only arm scored 12.0833 validation error against 13.7708 for the control at the same configuration [claim_coldrop_vs_control]. Column dropout was lower on every one of the three folds [claim_coldrop_vs_control].\n\nOur second finding isolates EMA within shrinkage: at the default lr and epoch budget with column dropout, saving EMA-averaged weights gave a five-seed error of 12.025 against 12.55 without averaging [claim_ema_default]. EMA was lower on all five seed-fold pairs [claim_ema_default].\n\nOur third finding is a null result for group-L1: at the default schedule, adding weak group-L1 to column dropout left the five-seed mean unchanged at 12.55 with the penalty and 12.55 without it [claim_group_l1_default_null]. Per-seed values differed only at seed one and seed four [claim_group_l1_default_null]."
+   },
+   {
+    "heading": "Related Work",
+    "body": "XGBoost is a scalable tree-boosting system whose regularized objective penalizes leaf count and L2 leaf weights, and it also uses shrinkage and column subsampling [related_xgboost] [arXiv:1603.02754]. The XGBoost paper reports no text benchmarks [related_xgboost]. This study transfers column subsampling and shrinkage to a neural bag-of-embeddings model [related_xgboost]. It also adds group-L1 on embedding rows as its own L1-style analogue and ablates each mechanism separately [related_xgboost].\n\nWork on connectome-constrained circuit models shows that comparisons are biased when baselines are under-tuned or inherit parameters tuned for the favoured model, and it names the machine-learning analogues [related_tuning_bias] [arXiv:2611.14508v1]. By analogy, the same caution applies here, because our control shares an untuned default configuration with the treatments [related_tuning_bias]. A related study cautions against relying on a single, unjustified task-specific baseline [related_single_baseline] [arXiv:2611.14519v1]. Our control is likewise one default-configuration model, with no tuned alternative regularizer in its place [related_single_baseline].\n\nMobileNets treats width multipliers as a capacity-accuracy trade-off in vision [related_width] [arXiv:1704.04861]. This study varied width only inside confounded high-capacity bundles, so it does not isolate capacity [related_width]."
+   },
+   {
+    "heading": "Setup",
+    "body": "A frozen scorer defines the data, the hashed-token mean-of-embeddings model and validation top-1 error, and only the training script is edited [scope_method]. Each arm adds transferred mechanisms to the stock script [scope_method]. Most comparisons pair an arm with an ablation that removes one mechanism, at the same configuration and seed-fold pairs [scope_method]. Two comparisons lack this pairing: column dropout plus group-L1 against the stock control, and two column-drop configurations that differ in both drop rate and group-L1 [scope_method]. Runs proceed through smoke, verify and full tiers, and later tiers reuse earlier seeds [scope_method]. We report two high-capacity bundles without matched controls as uninterpretable [scope_method]. No arm was scored on the held-out test split [scope_method].\n\nThe data are a class-stratified AG News subset built from the Hugging Face copy fancyzhx/ag_news with sampling seed 0 [setup_data]. Of these articles, 8,000 from the training split form the cross-validation pool, and 2,000 from the official test split form a held-out test set [setup_data]. Text is lower-cased, split on non-alphanumerics and truncated to 64 tokens [setup_tokens]. Each token is hashed with crc32 modulo 20000, plus 1, into 20,000 buckets, with id 0 reserved for padding [setup_tokens].\n\nThe frozen model averages the non-padding token embeddings, applies depth ReLU hidden layers of width hidden, and outputs 4 class logits [setup_model]. Every arm trains with cross-entropy loss on the class logits, and group-L1, where present, is added to this loss [setup_loss].\n\nThe pool is cut into 5 stratified folds by StratifiedKFold with shuffling and random_state 0 [setup_folds]. A run with seed i trains on the remaining folds and is scored on validation fold i, so seeds and folds are paired [setup_folds]. The metric is top-1 error in percent on the validation fold, and lower is better [setup_metric]. No run scored the held-out test split [setup_metric].\n\nThe default configuration is lr 0.003, embed_dim 64, hidden 64, depth 1, weight_decay 0.0001 and 8 epochs [setup_default]. Training uses Adam with coupled weight decay, batch 128 and normal initialisation with std 0.1 [setup_default]. Smoke runs use one seed with a 120-second budget, verify runs use three seeds with 300 seconds, and full runs use five seeds with 900 seconds [setup_tiers]. Later tiers reuse the seeds of earlier tiers [setup_tiers]. Each run trains on four of the five folds of the pool with batch 128 for 8 or 16 epochs, so the configuration fixes the optimizer step count [setup_steps].\n\nThirty registered runs over twelve candidate configurations all completed with a recorded validation score, and none failed or were excluded [setup_runs]. Of these runs, twelve are smoke runs, twelve are verify runs and six are full-tier runs [setup_runs].\n\nThe control arm runs the unmodified training script at the default configuration, with no column dropout, group-L1 or averaging [setup_control]. Column dropout draws one Bernoulli keep mask over the vocabulary per step, shared across the batch, and maps dropped ids to padding id 0 [setup_mask]. A row that would be fully masked keeps its original ids [setup_mask]. The two high-capacity bundles lack this fallback [setup_mask].\n\nThe column-drop-only arm uses the same code with drop fraction p=0.4 and group-L1 coefficient 0 [setup_coldrop_only]. The column-drop plus group-L1 arm uses drop rate 0.25 at each step and adds group-L1 at 1e-5 on the sum of embedding-row L2 norms, excluding the padding row [setup_coldrop_l1]. The column-drop plus weak group-L1 arm uses drop fraction p=0.4 with group-L1 at 1e-6 [setup_coldrop_weak_l1].\n\nThe EMA arm adds weight averaging to the column-drop-only arm with decay min(0.999, (1+t)/(10+t)) at step t, and it saves the EMA weights [setup_ema]. The long-schedule EMA arm uses lr 0.0015, 16 epochs, drop fraction p=0.4 and group-L1 0 [setup_long_ema]. Its two implementations use EMA decay min(cap, (1+t)/(10+t)), the same warmup form as the default-schedule EMA arm, with cap 0.999 in one and 0.995 in the other, and both save the EMA weights [setup_long_ema]. The long-schedule no-EMA arm uses lr 0.0015, 16 epochs, drop fraction p=0.4 and group-L1 0, and it saves the raw final weights [setup_long_noema].\n\nTwo group-L1 arms keep the long-schedule EMA recipe (lr 0.0015, 16 epochs, p=0.4, warmup EMA capped at 0.999) [setup_long_l1]. One adds dense group-L1 at 1e-5 on all non-padding embedding rows [setup_long_l1]. The other adds lazy group-L1 at 1e-4 only on rows active in each batch [setup_long_l1].\n\nHigh-capacity bundle A uses embed_dim 128, hidden 128, depth 2, lr 0.0015, weight_decay 5e-05 and 16 epochs [setup_highcap_a]. It adds column dropout p=0.3, group-L1 1e-5 and EMA at decay 0.999 without warmup [setup_highcap_a]. High-capacity bundle B uses the same configuration with column dropout p=0.25, group-L1 1e-5 and EMA decay 0.999 with warmup [setup_highcap_b]."
+   },
+   {
+    "heading": "Results: Column Dropout",
+    "body": "On seed-fold pairs zero to two, the column-drop-only arm scored 12.0833 validation error, with per-fold values of 12.1875, 11.875 and 12.1875 [claim_coldrop_vs_control]. The unregularized control at the same configuration scored 13.7708 (13.9375, 13.5 and 13.875 per fold), and its single-seed smoke run gave 13.9375 [claim_coldrop_vs_control]. Column dropout was therefore lower than the control on every one of the three folds [claim_coldrop_vs_control].\n\nThe column-drop plus group-L1 arm was also lower than the control on every fold of the same three seed-fold pairs [claim_coldrop_l1_vs_control]. This arm scored 12.3542 (13.0625, 12.0 and 12.0 per fold), and its smoke run gave 13.0625 [claim_coldrop_l1_vs_control]. The control it was compared against scored 13.7708 (13.9375, 13.5 and 13.875 per fold) [claim_coldrop_l1_vs_control].\n\nOver five seed-fold pairs, the first two column-drop configurations, which differ in both drop rate and group-L1, showed no consistent ordering across seeds [claim_full_tier_coldrop]. The column-drop plus group-L1 arm scored 12.6875 (std 0.6673), with per-seed values of 13.0625, 12.0, 12.0, 12.875 and 13.5 [claim_full_tier_coldrop]. The column-drop-only arm scored 12.55 (std 0.7634), with per-seed values of 12.1875, 11.875, 12.1875, 12.6875 and 13.8125 [claim_full_tier_coldrop]. The column-drop plus weak group-L1 arm also scored 12.55, with a std of 0.724 [claim_full_tier_coldrop]."
+   },
+   {
+    "heading": "Results: Shrinkage (EMA and Long Schedule)",
+    "body": "At the default lr and epoch budget with column dropout, saving EMA-averaged weights gave a five-seed validation error of 12.025 (11.75, 11.125, 11.875, 11.75, 13.625), against 12.55 (12.1875, 11.875, 12.1875, 12.6875, 13.8125) without averaging [claim_ema_default]. EMA was lower on all five seed-fold pairs [claim_ema_default]. For the EMA arm, the verify tier gave 11.5833 and the smoke run 11.75 [claim_ema_default].\n\nAt the halved lr and doubled epoch budget with column dropout, EMA weights scored 11.8542 (11.9375, 11.625, 12.0; smoke 11.9375) [claim_ema_long]. The same schedule without EMA scored 12.125 (12.25, 11.6875, 12.4375; smoke 12.25) [claim_ema_long]. EMA was lower on each of the three folds [claim_ema_long].\n\nThe low-lr long schedule gave no consistent gain over the default schedule [claim_schedule_null]. With EMA, the long schedule scored 11.8875 over five seeds (11.9375, 11.625, 12.0, 10.8125, 13.0625), against 12.025 (11.75, 11.125, 11.875, 11.75, 13.625) for the default schedule [claim_schedule_null]. The long schedule was higher on seeds zero to two and lower on seeds three and four [claim_schedule_null]. Without EMA, the long schedule scored 12.125 (12.25, 11.6875, 12.4375) against 12.0833 (12.1875, 11.875, 12.1875), a mixed result [claim_schedule_null].\n\nUnder the warmup EMA, the averaging window grows with step count, so the with-EMA schedule comparison changes the averaging window and doubles the steps along with lr and epochs [limit_10]. The no-EMA pair, which compares the long schedule against the column-drop-only arm, is therefore the schedule-only contrast [limit_10]."
+   },
+   {
+    "heading": "Results: Group-L1 on Embedding Rows",
+    "body": "At the default schedule, adding weak group-L1 to column dropout left the five-seed mean validation error unchanged, at 12.55 with the penalty and 12.55 without it [claim_group_l1_default_null]. Per-seed values differed only at seed one (11.9375 with the penalty vs 11.875 without) and at seed four (13.75 vs 13.8125) [claim_group_l1_default_null]. The verify tier gave 12.1042 with the penalty and 12.0833 without it [claim_group_l1_default_null]. The smoke runs of both arms gave the same error, 12.1875 [claim_group_l1_default_null].\n\nOn top of the long-schedule EMA recipe, which scored 11.8542 with per-fold values of 11.9375, 11.625 and 12.0, dense group-L1 scored 11.875 (12.0, 11.6875 and 11.9375; smoke 12.0) [claim_group_l1_long_null]. Lazy group-L1 on batch-active rows, run at a larger coefficient, scored 11.9375 (12.1875, 11.75 and 11.875; smoke 12.1875) [claim_group_l1_long_null]. Neither penalty lowered error consistently across the three folds [claim_group_l1_long_null].\n\nThe group-L1 null may reflect coefficients that were too small relative to the coupled Adam weight decay, or Adam rescaling the penalty [limit_12]. Neither possibility was checked, so the null holds only for the coefficients we tried [limit_12]."
+   },
+   {
+    "heading": "Results: Variance, Fold Difficulty and Uninterpretable Bundles",
+    "body": "In every five-seed arm, the seed-four/fold-four pair had the highest validation error, at 13.5, 13.8125, 13.75, 13.625 and 13.0625 [claim_fold_four]. Each five-seed std (0.6673, 0.7634, 0.724, 0.9412, 0.8094) exceeds the three-seed std of the same arm on seeds zero to two [claim_fold_four].\n\nTwo bundles that doubled width, used depth two and combined all three mechanisms scored above both default-capacity column-drop arms on every one of folds zero to two [claim_highcap_bundles]. Bundle A, which averaged without warmup, scored 14.5417 (16.1875, 13.3125, 14.125; smoke 16.1875) [claim_highcap_bundles]. Bundle B, which used warmup, scored 13.3125 (13.9375, 12.5625, 13.4375; smoke 13.9375) [claim_highcap_bundles]. On the same folds, the column-drop plus group-L1 arm scored 12.3542 (13.0625, 12.0, 12.0) [claim_highcap_bundles]. The column-drop-only arm scored 12.0833 (12.1875, 11.875, 12.1875) [claim_highcap_bundles].\n\nThe high-capacity bundles confound capacity, lr, epochs, drop rate and EMA variant, and no capacity-matched control ran, so neither result can be attributed to any mechanism [limit_13]. One bundle averaged from initialisation without warmup, which offers a competing explanation for its high error [limit_13]."
+   },
+   {
+    "heading": "Discussion: What Governs the EMA Gain",
+    "body": "Two implementations of the long-schedule EMA recipe produced identical per-seed errors, at 11.8542 on the verify seeds in both and 11.8875 on the five-seed mean in both [claim_ema_cap_identity]. The two implementations differ only in the EMA decay cap [claim_ema_cap_identity].\n\nThe decay cap never binds in these runs [claim_ema_warmup_mechanism]. The step count is fixed by the recorded pool size, the five-fold split, the batch size and the epoch budget [claim_ema_warmup_mechanism]. At that step count, the warmup term of the decay schedule stays below either cap for the whole run [claim_ema_warmup_mechanism]. The averaging that helped is therefore governed by the warmup schedule, whose effective window is shorter than the nominal cap implies [claim_ema_warmup_mechanism].\n\nWe compared EMA effects across separate runs, not as raw versus averaged weights from the same run [limit_9]. Step counts were not logged, so the claim that the decay cap never binds is derived from the recorded fold size, batch size and epochs, not measured [limit_9].\n\nWe took no mechanism measurements: no train/validation gap, no learning curves, no per-token reliance and no embedding-row norms [limit_11]. Two hypotheses therefore remain untested: that the gains are early stopping in disguise, and that dropout prevents reliance on topic tokens [limit_11]."
+   },
+   {
+    "heading": "Limitations",
+    "body": "The unregularized control ran only on seed-fold pairs zero to two [limit_1]. The column-dropout effect therefore rests on three folds, and no five-seed control exists [limit_1]. Seed index and validation fold are coupled, so seed variance mixes initialisation noise with fold difficulty [limit_2]. Fold four is consistently hardest [limit_2].\n\nThe verify and full tiers reuse the seeds of earlier tiers [limit_3]. These tiers are nested subsets, not independent replicates [limit_3]. Each comparison is a sign pattern over three or five folds [limit_4]. No significance test or confidence interval was computed [limit_4].\n\nPer-fold errors move in steps of one validation article [limit_5]. One of the three long-schedule EMA margins, at fold one, is a single article, so that comparison is weak on its own [limit_5]. The five-fold default-schedule EMA comparison carries most of the weight [limit_5]. All arms were selected and compared on validation folds [limit_6]. The held-out test split was never scored, so selection bias toward validation noise is possible [limit_6].\n\nThe planned comparison against hidden dropout plus weight decay, tuned with an equal trial budget, never ran [limit_7]. Column dropout may therefore act as generic regularization rather than as a word-specific effect [limit_7]. The control used the default configuration and was not tuned for its own arm [limit_7]. The two default-schedule column-drop configurations change drop rate and group-L1 together [limit_8]. Dose-response in the drop rate was not measured [limit_8].\n\nThe logistic-regression baseline quoted in the profile was never run under this protocol and is not directly comparable with any arm [limit_14]. Results cover one dataset subset, one small hashed-vocabulary model and short training budgets [limit_15]. Historical code provenance relies on recorded candidate source versions, not execution snapshots [limit_15]."
+   },
+   {
+    "heading": "Conclusion",
+    "body": "We asked which of three XGBoost-derived regularizers lowers validation top-1 error for a small bag-of-embeddings classifier, and in this setting vocabulary-column dropout lowered error against the stock control on all three evaluated folds [claim_overall]. Of shrinkage's two parts, EMA weight averaging lowered error against its no-EMA ablation on every evaluated fold, while the low-lr long schedule and group-L1 on embedding rows showed no consistent effect [claim_overall].\n\nThe strongest evidence is the five-seed EMA comparison at the default lr and epoch budget with column dropout, where EMA-averaged weights gave an error of 12.025 against 12.55 without averaging [claim_ema_default]. EMA was lower on all five seed-fold pairs [claim_ema_default].\n\nThe column-dropout result carries a clear limit: the unregularized control ran only on seed-fold pairs zero to two, so the effect rests on three folds and no five-seed control exists [limit_1].\n\nThe next step is the planned comparison against hidden dropout plus weight decay, tuned with an equal trial budget, which never ran [limit_7]. That comparison would test whether column dropout acts as generic regularization rather than a word-specific effect, since our control used the default configuration and was not tuned for its own arm [limit_7]."
+   }
+  ]
+ },
+ "reviewers": [
+  {
+   "persona": "harsh-but-fair",
+   "score": 3,
+   "recommendation": "reject"
+  },
+  {
+   "persona": "harsh-critical",
+   "score": 2,
+   "recommendation": "reject"
+  },
+  {
+   "persona": "open-minded",
+   "score": 3,
+   "recommendation": "reject"
+  }
+ ],
+ "agent_calls": 108,
+ "rejected_attempts": [
+  {
+   "agent": "direction_mapper",
+   "attempt": 1,
+   "errors": [
+    "direction 1: unknown paper ids ['[arXiv:2611.14508v1]', '[arXiv:2611.14519v1]'] (cite only the bracketed ids)",
+    "direction 2: unknown paper ids ['[arXiv:1704.04861]', '[arXiv:2611.14508v1]'] (cite only the bracketed ids)",
+    "direction 3: unknown paper ids ['[arXiv:2611.14508v1]', '[arXiv:2611.14519v1]'] (cite only the bracketed ids)",
+    "direction 4: unknown paper ids ['[arXiv:1603.02754]', '[arXiv:2611.14508v1]', '[arXiv:2611.14519v1]'] (cite only the bracketed ids)"
+   ]
+  },
+  {
+   "agent": "ideator:transfer",
+   "attempt": 1,
+   "errors": [
+    "schema: '' should be non-empty"
+   ]
+  },
+  {
+   "agent": "argument_builder",
+   "attempt": 1,
+   "errors": [
+    "method_summary is 126 words; the limit is 120. Split it or cut it"
+   ]
+  }
+ ],
+ "spend": {
+  "usd": 17.0,
+  "requests": 160
+ }
+}
