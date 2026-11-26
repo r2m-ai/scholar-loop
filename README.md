@@ -158,11 +158,16 @@ say. A sentence passes when it cites an approved statement and its numbers are i
 ```console
 $ scholarloop check "The column-drop-only arm scored 12.0833 validation error on the three evaluated folds [claim_coldrop_vs_control]."
 ACCEPTED
+  The column-drop-only arm scored 12.0833 validation error on the three evaluated folds
+  [claim_coldrop_vs_control].
 
 $ scholarloop check "The column-drop-only arm scored 11.2 validation error on the three evaluated folds [claim_coldrop_vs_control]."
 REFUSED
+  The column-drop-only arm scored 11.2 validation error on the three evaluated folds
+  [claim_coldrop_vs_control].
     - numbers ['11.2'] are not in the approved statements ['claim_coldrop_vs_control'] that this
-    sentence cites
+    sentence cites: 'The column-drop-only arm scored 11.2 validation error on the three
+    evaluated folds [claim_'
 ```
 
 `scholarloop statements` lists what a sentence may cite, `scholarloop trace "text"` follows a
