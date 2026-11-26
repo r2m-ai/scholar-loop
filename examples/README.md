@@ -15,8 +15,9 @@ Run every script from the repository root.
 
 ## Live: uses the Anthropic API and costs money
 
-Set `ANTHROPIC_API_KEY` and install `.[llm]`. Set `SCHOLARLOOP_SPEND_CAP` (USD) to bound the
-spend: it is checked before every request.
+Set `ANTHROPIC_API_KEY` and install `.[llm,engines]`; the AG News case study also needs
+`.[nlp]`. Set `SCHOLARLOOP_SPEND_CAP` (USD) to bound the spend: it is checked before every
+request.
 
 | Script | What it does |
 |---|---|

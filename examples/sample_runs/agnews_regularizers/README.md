@@ -19,7 +19,7 @@ Open it in the web UI: start `python3 -m scholarloop.ui` from the repository roo
 | File | What it is |
 |---|---|
 | `steer.json`, `lit_review.md`, `directions.md`, `ideas.md` | the author's steer, the literature review, the direction map and the ideas with their tournament |
-| `experiments.jsonl`, `registry/`, `experiment_agenda/` | the ledger of every training run, the frozen protocols and the code version of each arm |
+| `experiments.jsonl`, `registry/` | the ledger of every training run and the code version of each arm |
 | `scientific_review.md` | the argument, the four critics' reports and the author's release |
 | `outline.md`, `key_points.md`, `paper.md`, `review.md` | the staged write-up and the simulated reviewers' reports |
 | `paper_traced.md`, `evidence_map.md` | the approved statement behind every sentence, and the runs behind every statement |

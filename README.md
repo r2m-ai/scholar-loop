@@ -62,11 +62,11 @@ go back and see who decided what, and on which evidence.
 
 | Stage | The AI does | You decide | Code checks |
 |---|---|---|---|
-| **1 · Literature & directions** | retrieves papers, writes the review, and maps three to five directions, at least one of which must challenge your hunch | what you want to find out, and which directions to follow | every cited paper was retrieved |
+| **1 · Literature & directions** | retrieves papers, writes the review, and maps three to five directions | what you want to find out, and which directions to follow | every cited paper was retrieved; if you state a hunch, at least one direction must challenge it or come from outside your steer |
 | **2 · Research ideas** | generates ideas from the papers and ranks them in a tournament | which idea to test; you can give feedback or add your own | a tournament win must hold in both presentation orders |
-| **3 · Experiments** | proposes training runs and edits the training script | when to stop, and whether to ask for a fixed protocol | scores come from a frozen scorer; the idea runs as a treatment against a matched control |
+| **3 · Experiments** | proposes training runs and edits the training script | when to stop, and whether to ask for a fixed protocol | scores come from a frozen scorer; the idea must run as a treatment before a second control or a change of direction |
 | **4 · Scientific review** | four critics question every claim and can request experiments | whether to approve the argument | each claim's numbers are values of its measurements; approval is bound to the evidence |
-| **5 · Writing** | drafts the paper from approved statements; three simulated reviewers score it | the outline and the key points | every sentence cites an approved statement and uses only its numbers and sources |
+| **5 · Writing** | drafts the paper from approved statements; three simulated reviewers score it | whether the outline and the key points are right | every sentence cites an approved statement and uses only its numbers and sources |
 
 ## ✨ What it does
 
@@ -77,15 +77,15 @@ go back and see who decided what, and on which evidence.
 **🧭 Ideation you steer**
 
 It will not start from a bare topic. You say what you want to find out and your hunch; it maps
-directions from the literature, and at least one must challenge you.
+directions from the literature, and at least one must challenge the hunch or look beyond it.
 
 </td>
 <td width="50%" valign="top">
 
 **🧪 Ideas that actually get tested**
 
-The idea you pick has to run as a treatment against a matched control. The loop cannot wander
-off and tune hyperparameters instead.
+The idea you pick has to run as a treatment before the loop may move on, and only one control
+may run ahead of it. The loop cannot spend its budget tuning around your idea.
 
 </td>
 </tr>
@@ -94,8 +94,8 @@ off and tune hyperparameters instead.
 
 **🔒 Scores the model cannot touch**
 
-Training only saves weights. A separate, frozen scorer produces every reported number, and the
-held-out split stays sealed during exploration.
+Training only saves weights. A separate, frozen scorer produces every score, and the held-out
+split stays sealed during exploration.
 
 </td>
 <td valign="top">
@@ -171,9 +171,9 @@ the whole run stage by stage.
 
 ## 🖥️ The web UI
 
-The UI runs on your machine only. It starts the same stage commands as the command line, keeps
-their logs, and takes each of your decisions as an explicit action. A recorded run opens
-read-only, so you can look at everything without spending anything.
+The UI runs on your machine only. It runs each stage as a background job, keeps the logs, and
+takes each of your decisions as an explicit action. A recorded run opens read-only, so you can
+look at everything without spending anything.
 
 ![The overview of a recorded run in the ScholarLoop web UI: progress through the five stages, the result of each experiment arm, recent artifacts and the run's configuration](assets/ui-workspace.jpg)
 
@@ -226,24 +226,26 @@ read-only, so you can look at everything without spending anything.
 - **A literature review you can push back on.** Papers come from arXiv and OpenAlex. Every cited
   identifier must be a paper that was retrieved.
 - **A direction map.** Three to five lines of inquiry, each with an open question, a cheap first
-  experiment and the most likely way it turns out dull. It may not only agree with you. You
-  choose directions, or write your own.
-- **A tournament the model cannot rig.** Judges compare every pair of ideas twice with the order
-  swapped; a win in one order only is a draw. Elo is computed in code.
+  experiment and the most likely way it turns out dull. If you gave a hunch, the map may not
+  only agree with it. You choose directions, or write your own.
+- **A tournament the model cannot rig.** Judges compare ideas in pairs, each pair twice with the
+  order swapped; a win in one order only is a draw. Elo is computed in code.
 - **Your pick.** Choose one, reject them all, or bring your own idea.
 
 ### 2 · Experiments: the idea you picked gets tested
 
 Each round the Reasoner proposes runs, three critics vote on whether each deserves compute, and
-the survivors climb a funnel of one seed, then three, then five. Most ideas die after the first
-cheap run.
+the survivors climb a funnel of one seed, then three, then five. Only some of them reach the
+five-seed tier.
 
-- **Your idea cannot be tuned around.** Every proposal is labelled a `treatment` or its matched
-  `control`. The loop may not change direction until a treatment has run. If no hyperparameter
-  expresses the idea, the Reasoner rewrites the training script in an isolated copy.
-- **The model never reports its own score.** A frozen scorer in a separate process does.
-- **Predictions are checked.** Each proposal predicts its effect before it runs, and each agent
-  sees its track record.
+- **Your idea cannot be tuned around.** While your idea is under test, every proposal is labelled
+  a `treatment` or its `control`, and only one control may run before the first treatment. The
+  loop may not change direction until a treatment has run. If no hyperparameter expresses the
+  idea, the Reasoner rewrites the training script in an isolated copy.
+- **The model never reports its own score.** A frozen scorer in a separate process does. Anything
+  the training script says about itself is kept apart and labelled self-reported.
+- **Predictions are checked.** Each proposal predicts its effect before it runs, and the Reasoner
+  sees how past predictions and votes turned out.
 - **The test set stays sealed.** Opening it ends exploration for that campaign.
 
 ### 3 · Review and writing: you approve the argument
@@ -256,7 +258,8 @@ cheap run.
 - **Your approval is bound to the evidence.** Change a run, the argument or the code afterwards
   and it is void.
 - **Writing in stages.** A panel argues over the outline, then the key points, and you sign off
-  on each. Sections are then drafted so that every sentence restates an approved statement.
+  on each unless you let the stages run unattended. Sections are then drafted so that every
+  sentence cites an approved statement.
 - **What you get.** A reader's edition, a traced edition with the statement behind each
   sentence, an evidence map, and three simulated reviewers' reports.
 
@@ -290,8 +293,8 @@ runs with `claude-opus-5-5`:
 
 <table>
 <tr>
-<td align="center" width="33%"><h3>971 of 971</h3>fabricated citations, numbers and run ids rejected<br><sub>and 0 of 41 clean artifacts rejected</sub></td>
-<td align="center" width="33%"><h3>1,627</h3>faults injected one at a time into accepted artifacts<br><sub>run it yourself from Evaluation &amp; Tools, free</sub></td>
+<td align="center" width="33%"><h3>971 of 971</h3>fabrications rejected: invented citations, numbers and ids, uncited sentences, dropped sections<br><sub>and 0 of 41 clean artifacts rejected</sub></td>
+<td align="center" width="33%"><h3>1,627</h3>faults injected one at a time into accepted artifacts<br><sub>free to run again, on your own run or a recorded one</sub></td>
 <td align="center" width="33%"><h3>0–5% vs 7–20%</h3>claims that go beyond the evidence<br><sub>ScholarLoop paper vs a single-call writer</sub></td>
 </tr>
 </table>
@@ -312,6 +315,9 @@ files are in [`examples/sample_runs/`](examples/sample_runs/).
 | [Distillation](examples/sample_runs/distillation_on_vs_off_policy/) | does an adaptive switch from teacher to student prefixes help | the registered prediction was falsified | 10 / 3 | $34.40 |
 | [AG News](examples/sample_runs/agnews_regularizers/) | which boosting regularizers transfer to a small text classifier | partly held; the named comparator never ran | 2 / 1 | $13.39 |
 | [Digits](examples/sample_runs/digits_skip_connection/) | does a skip connection change a shallow MLP's final error | neither supported nor falsified | 7 / 2 | $25.66 |
+
+Cost is the spend counted against the cap when the reviewed paper was finished. The evaluation
+requests made afterwards are not included.
 
 The full measurements, with every table, are in [`REFERENCE.md`](REFERENCE.md#measurements).
 
@@ -349,6 +355,8 @@ scholarloop/
 ├── review/            evidence dossier, critics, issue history, author release
 ├── writing/           staged writing session and writing guides
 ├── ui/                the local web UI: server, job runner, run store, static front end
+├── replay.py          the `scholarloop` command: replay, trace and check a recorded run
+├── samples/           the recorded run that ships with the package
 ├── reliability.py     fault injection, attempt-log analysis, single-call baseline, claim audit
 ├── fidelity_study.py  does a campaign test the idea it was handed, with and without enforcement
 ├── human_eval.py      builds the blinded rater packet for the claim audit and scores the returns

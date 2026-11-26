@@ -45,7 +45,7 @@ paper:
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 python -m scholarloop.ideation --profile profiles/digits-mlp.yaml --out runs/d \
-  --topic "small MLP image classification regularization" --auto
+  --topic "small MLP image classification regularization" --unsteered --auto
 SCHOLARLOOP_HANDOFF=runs/d/handoff.json SCHOLARLOOP_OUT=runs/d \
   SCHOLARLOOP_POPULATION=3 SCHOLARLOOP_MAX_WORKERS=3 SCHOLARLOOP_DRY_PATIENCE=2 \
   SCHOLARLOOP_STEPS=4 SCHOLARLOOP_MAX_COST=8 python examples/run_to_paper.py < /dev/null

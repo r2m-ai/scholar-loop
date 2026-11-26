@@ -176,6 +176,33 @@ def reviewed_run(tmp_path):
     return profile, {"ledger": ledger, "registry": registry, "research": out, "writing": out / "writing.json"}
 
 
+def test_a_copied_run_is_checked_against_its_recorded_release_only_on_request(reviewed_run):
+    profile, paths = reviewed_run
+    _, original = load_cases(profile, **paths)
+    out = paths["research"]
+    state = json.loads((out / "scientific_review.json").read_text(encoding="utf-8"))
+    state["dossier"]["input_manifest"]["ledger"]["path"] = "./experiments.jsonl"   # as a shipped sample
+    (out / "scientific_review.json").write_text(json.dumps(state), encoding="utf-8")
+    _, strict = load_cases(profile, **paths)
+    assert strict.mode.startswith("legacy") and not strict.statements
+    cases, recorded = load_cases(profile, **paths, recorded_release=True)
+    assert recorded.mode.startswith("reviewed, against the release as recorded")
+    assert recorded.statements == original.statements
+    assert run_injection(cases, recorded)["controls"]["false_positives"] == 0
+    writing = json.loads(paths["writing"].read_text(encoding="utf-8"))
+    paths["writing"].write_text(json.dumps({**writing, "release_id": "0" * 64}), encoding="utf-8")
+    _, other = load_cases(profile, **paths, recorded_release=True)      # the writing cites another release
+    assert other.mode.startswith("legacy")
+
+
+def test_the_session_file_supplies_the_review_and_ideas_when_their_files_are_absent(run):
+    review = json.loads((run["research"] / "lit_review.json").read_text(encoding="utf-8"))
+    (run["research"] / "lit_review.json").unlink()
+    assert "lit_review" not in [c.target for c in load_cases(PROFILE, **run)[0]]
+    (run["research"] / "session.json").write_text(json.dumps({"review": review}), encoding="utf-8")
+    assert "lit_review" in [c.target for c in load_cases(PROFILE, **run)[0]]
+
+
 def test_reviewed_mode_uses_the_release_and_sees_sentence_local_misattribution(reviewed_run):
     profile, paths = reviewed_run
     cases, ctx = load_cases(profile, **paths)

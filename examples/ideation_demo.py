@@ -132,11 +132,13 @@ PROPOSAL = {"rationale": "follow the chosen plan: warmup=5 with lr=0.1 and cosin
 def main() -> int:
     profile = load_profile(ROOT / "profiles" / "image-classification.yaml")   # stub engine: instant
     tmp = Path(tempfile.mkdtemp(prefix="ideation_"))
-    feeds = iter([ATOM, ATOM, MIXUP])                        # 2 planned queries, then 1 feedback query
+    feeds = iter([ATOM, ATOM, ATOM, MIXUP])                  # 3 planned queries, then 1 feedback query
     session_llm = MockLLM(jsons=[
-        {"queries": ["residual networks small models", "cosine schedule warmup"], "rationale": "arch + optim"},
+        # a paper is kept only if it shares at least half of one query's words, so each query is specific
+        {"queries": ["residual networks", "cosine annealing schedule", "learning rate warmup"],
+         "rationale": "arch + optim"},
         REVIEW_1,
-        {"queries": ["mixup data augmentation"], "rationale": "the reader asked for data-side regularization"},
+        {"queries": ["mixup training pairs"], "rationale": "the reader asked for data-side regularization"},
         REVIEW_2,
         DIRECTIONS,
         IDEAS,

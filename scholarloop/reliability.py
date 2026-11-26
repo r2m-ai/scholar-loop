@@ -121,14 +121,20 @@ def _set(obj, path, value):
     obj[path[-1]] = value
 
 
-def load_cases(profile, *, ledger, registry, research, writing, review_dir=None) -> tuple[list[Case], Context]:
+def load_cases(profile, *, ledger, registry, research, writing, review_dir=None,
+               recorded_release=False) -> tuple[list[Case], Context]:
     """Build cases from one captured run: its ledger, registry, research session and writing state.
 
     When the writing state is bound to a scientific release that still validates, the guards
     run in `reviewed` mode, exactly as they did in production: prose must cite approved
     statements and numbers are checked per sentence against the statements cited there.
     Otherwise they run in `legacy` mode (numbers and ids checked against the whole evidence
-    bank), and `Context.mode` says why."""
+    bank), and `Context.mode` says why.
+
+    A release is bound to the machine and paths of the run, so a copied run (a shipped sample)
+    no longer validates. `recorded_release` then takes the approved dossier as it was recorded,
+    provided the review is released and the writing cites that release, and `Context.mode`
+    says the release was not re-validated."""
     from scholarloop.core.ledger import Ledger
     from scholarloop.ideation.ideator import Ideator
     from scholarloop.ideation.litreview import LitReview, LitReviewer
@@ -136,8 +142,14 @@ def load_cases(profile, *, ledger, registry, research, writing, review_dir=None)
 
     research = Path(research)
     entries = list(Ledger(ledger).read_all())
-    lit_path = research / "lit_review.json"
-    raw_review = json.loads(lit_path.read_text(encoding="utf-8")) if lit_path.exists() else None
+    def recorded(name, key):                 # the session file holds the same review and ideas
+        for path, pick in ((research / name, None), (research / "session.json", key)):
+            if path.exists():
+                doc = json.loads(path.read_text(encoding="utf-8"))
+                return doc.get(pick) if pick else doc
+        return None
+
+    raw_review = recorded("lit_review.json", "review")
     review = LitReview.from_dict(raw_review) if raw_review else None
     handoff = research / "handoff.json"
     idea = json.loads(handoff.read_text(encoding="utf-8")).get("idea") if handoff.exists() else None
@@ -147,7 +159,8 @@ def load_cases(profile, *, ledger, registry, research, writing, review_dir=None)
     if state.get("release_id"):
         ctx.mode = _bind_release(profile, bank, ctx, ledger=ledger, registry=registry,
                                  research=research,
-                                 review_dir=Path(review_dir or Path(writing).parent))
+                                 review_dir=Path(review_dir or Path(writing).parent),
+                                 recorded=state["release_id"] if recorded_release else None)
     cases: list[Case] = []
 
     if review:
@@ -158,9 +171,9 @@ def load_cases(profile, *, ledger, registry, research, writing, review_dir=None)
                           [("themes", i, "papers") for i in range(len(lit.get("themes", [])))]
                           + [("gaps", i, "sources") for i in range(len(lit.get("gaps", [])))]))
 
-    ideas_path = research / "ideas.json"
-    if ideas_path.exists() and review:
-        ideas = {"ideas": json.loads(ideas_path.read_text(encoding="utf-8"))}
+    raw_ideas = recorded("ideas.json", "ideas")
+    if raw_ideas and review:
+        ideas = {"ideas": raw_ideas}
         ideator = Ideator(None, profile)
         cases.append(Case("ideas", "ideas", ideas,
                           lambda a: ideator.postcheck(a, {"review": review}), [],
@@ -187,9 +200,9 @@ def load_cases(profile, *, ledger, registry, research, writing, review_dir=None)
     return cases, ctx
 
 
-def _bind_release(profile, bank, ctx, *, ledger, registry, research, review_dir) -> str:
+def _bind_release(profile, bank, ctx, *, ledger, registry, research, review_dir, recorded=None) -> str:
     """Attach the approved dossier the writing was bound to, if its release still validates."""
-    from scholarloop.review.contracts import ReviewBlocked
+    from scholarloop.review.contracts import ReviewBlocked, digest
     from scholarloop.review.dossier import approved_statements
     from scholarloop.review.session import ScientificReviewSession
     reason = "no release"
@@ -204,6 +217,19 @@ def _bind_release(profile, bank, ctx, *, ledger, registry, research, review_dir)
         bank.approved_dossier = dossier
         ctx.statements = sorted(approved_statements(dossier))
         return "reviewed"
+    if recorded:                # a copied run: paths and machine differ, so the hashes cannot match
+        try:
+            state = gate.load()
+            release, dossier = state.get("release") or {}, state.get("dossier") or {}
+            intact = (state.get("status") == "READY_TO_WRITE" and dossier.get("argument")
+                      and release.get("id") == recorded
+                      and recorded == digest({k: v for k, v in release.items() if k != "id"}))
+        except (ReviewBlocked, OSError, ValueError, KeyError):
+            intact = False
+        if intact:
+            bank.approved_dossier = dossier
+            ctx.statements = sorted(approved_statements(dossier))
+            return "reviewed, against the release as recorded (not re-validated on this machine)"
     return f"legacy (the writing cites a release that no longer validates: {reason})"
 
 
@@ -1057,6 +1083,9 @@ def main(argv=None) -> int:
     run_args(p)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--per-case", type=int, default=8)
+    p.add_argument("--recorded-release", action="store_true",
+                   help="for a copied run such as a shipped sample: check against the approved "
+                        "evidence as recorded, without re-validating the release on this machine")
     p = sub.add_parser("traces", help="natural fault rate from *.agents.jsonl (free)")
     p.add_argument("--traces", nargs="+", required=True, help="trace files or directories")
     p.add_argument("--out", required=True)
@@ -1106,7 +1135,7 @@ def main(argv=None) -> int:
              "research": a.research or run, "writing": a.writing or run / "writing.json",
              "review_dir": a.review_dir}
     profile = load_profile(a.profile)
-    cases, ctx = load_cases(profile, **paths)
+    cases, ctx = load_cases(profile, **paths, recorded_release=getattr(a, "recorded_release", False))
 
     if a.command == "inject":
         report = run_injection(cases, ctx, seed=a.seed, per_case=a.per_case)

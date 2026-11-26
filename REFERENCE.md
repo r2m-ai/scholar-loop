@@ -5,7 +5,7 @@ final-test controls, comparison harnesses and environment variables.
 
 ## Driving a run from the command line
 
-The web UI runs these same commands as background jobs.
+The web UI runs the same stages as background jobs.
 
 ```bash
 # 1 · ideation: steer, literature review, direction map, ideas, tournament, your pick
@@ -36,7 +36,8 @@ without a terminal. The run then stops at the direction map; `--directions 1,3`,
 `--own-direction "…"` and `--direction-note "…"` record your choice and continue.
 `--stop-after review|directions|ideas` writes that page and exits for a human. `--feedback "…"`
 and `--select 2` resume from another process. `--auto` chooses every mapped direction and the
-tournament's top idea; `--unsteered` waives the steer. Both are logged as not being your call.
+tournament's top idea; `--unsteered` waives the steer. The automatic pick is logged as
+automated, and the waiver is logged under your name.
 `--deep --brief examples/research_brief.json` generates ideas by independent strategies
 (mechanism, transfer, contradiction) with retrieval per idea.
 `--decision reject|refine|merge|revive --idea-ids …` records your decisions against stable
@@ -308,8 +309,24 @@ runs each variant through the production check: 1,627 injected faults over the t
 | Clean artifact rejected | an unchanged artifact | 0 of 12 | 0 of 15 | 0 of 14 |
 
 A check that looks up whether something exists cannot tell whether it is used correctly. A
-number moved to the wrong sentence is caught every time; a flipped direction inside prose mostly
-is not. The study also exposed two real holes in the checks, both now closed.
+number moved to the wrong claim was caught in 93 to 100% of cases; a flipped direction inside a
+drafted section never was. The study also exposed two real holes in the checks, both now closed.
+
+The reports behind this table are in `examples/sample_runs/*/reliability/injection.md`. Injection
+needs no model and costs nothing, so you can run it again on a recorded run:
+
+```bash
+python -m scholarloop.reliability inject --profile profiles/seq-distill.yaml \
+  --run examples/sample_runs/distillation_on_vs_off_policy --recorded-release --out runs/inject
+```
+
+The other two runs use `profiles/agnews-bow.yaml` and `profiles/digits-mlp.yaml`. A release is
+tied to the machine and paths of the run that produced it, so `--recorded-release` checks the
+copy in this repository against its approved evidence as recorded. On your own run, leave the
+flag out, or use Evaluation & Tools in the web UI. This version reproduces every count in the
+table except one: Digits misattribution comes to 137 of 256, because the checks were tightened
+after the reports were written. For the same reason it attributes rejections to guards more
+finely in the guard-removal table.
 
 ### Does the paper say more than the evidence holds?
 
