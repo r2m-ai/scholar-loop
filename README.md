@@ -23,9 +23,9 @@ Code checks every citation, number and claim against the record before it reache
 
 <div align="center">
 
-<a href="assets/demo.mp4"><img src="assets/demo-preview.gif" alt="A clip from the demo. On the Writing page of a recorded study, the manuscript's sentence-by-sentence trace opens and one sentence is highlighted with the approved claim it cites. The evidence map then opens on that claim and shows the two measurements and the training runs behind the sentence's numbers." width="100%"></a>
+<a href="https://youtu.be/MyJltw1kRjY"><img src="assets/demo-preview.gif" alt="A clip from the demo. On the Writing page of a recorded study, the manuscript's sentence-by-sentence trace opens and one sentence is highlighted with the approved claim it cites. The evidence map then opens on that claim and shows the two measurements and the training runs behind the sentence's numbers." width="100%"></a>
 
-**[▶ Watch the full demo](assets/demo.mp4)** (2 min 25 s, narrated)
+**[▶ Watch the full demo on YouTube](https://youtu.be/MyJltw1kRjY)** (2 min 25 s, narrated)
 
 </div>
 
