@@ -323,10 +323,7 @@ python -m scholarloop.reliability inject --profile profiles/seq-distill.yaml \
 The other two runs use `profiles/agnews-bow.yaml` and `profiles/digits-mlp.yaml`. A release is
 tied to the machine and paths of the run that produced it, so `--recorded-release` checks the
 copy in this repository against its approved evidence as recorded. On your own run, leave the
-flag out, or use Evaluation & Tools in the web UI. This version reproduces every count in the
-table except one: Digits misattribution comes to 137 of 256, because the checks were tightened
-after the reports were written. For the same reason it attributes rejections to guards more
-finely in the guard-removal table.
+flag out, or use Evaluation & Tools in the web UI.
 
 ### Does the paper say more than the evidence holds?
 
