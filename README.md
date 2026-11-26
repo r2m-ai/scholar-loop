@@ -4,18 +4,37 @@
 
 **A research loop that shows its work.**
 
-You steer. The model reads, proposes, experiments and writes.<br>
+AI-assisted research, from your first question to a reviewed paper.<br>
+The AI does the groundwork. You guide the direction and make the key decisions.<br>
 Code checks every citation, number and claim against the record before it reaches the page.
 
 [![tests](https://github.com/r2m-ai/scholar-loop/actions/workflows/ci.yml/badge.svg)](https://github.com/r2m-ai/scholar-loop/actions/workflows/ci.yml)
+[![version](https://img.shields.io/badge/version-0.1.0-C2603C)](pyproject.toml)
 [![python](https://img.shields.io/badge/python-3.10%2B-blue)](#-quick-start)
 [![platform](https://img.shields.io/badge/platform-Windows%20%C2%B7%20macOS%20%C2%B7%20Linux-lightgrey)](#-quick-start)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![release](https://img.shields.io/badge/status-research%20preview-orange)](#-quick-start)
 
-[Quick start](#-quick-start) · [The web UI](#%EF%B8%8F-the-web-ui) · [What it does](#-what-it-does) · [How it works](#-how-it-works) · [The rules](#%EF%B8%8F-rules-the-model-cannot-talk-its-way-around) · [Recorded runs](#-checked-not-just-claimed)
+[Demo](#-see-it-in-two-minutes) · [Quick start](#-quick-start) · [You and the AI](#-you-and-the-ai-step-by-step) · [The web UI](#%EF%B8%8F-the-web-ui) · [How it works](#-how-it-works) · [The rules](#%EF%B8%8F-rules-the-model-cannot-talk-its-way-around) · [Measurements](#-how-well-the-checks-work)
 
-<br>
+</div>
+
+## 🎬 See it in two minutes
+
+<div align="center">
+
+<a href="assets/demo.mp4"><img src="assets/demo-preview.gif" alt="A clip from the demo. On the Writing page of a recorded study, the manuscript's sentence-by-sentence trace opens and one sentence is highlighted with the approved claim it cites. The evidence map then opens on that claim and shows the two measurements and the training runs behind the sentence's numbers." width="100%"></a>
+
+**[▶ Watch the full demo](assets/demo.mp4)** (2 min 25 s, narrated)
+
+</div>
+
+The clip follows one sentence of a generated paper back to the approved claim it cites, and from
+that claim to the measurements and training runs behind its two numbers. The full demo walks
+through a real study in order: the question, the direction, the ideas, the experiments, the
+review, the paper, and the download of every record.
+
+<div align="center">
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/workflow-dark.svg">
@@ -30,9 +49,24 @@ Ask a language model to "do research" and you get a confident paper. The trouble
 check it: a citation that does not exist, a number nobody measured, a headline idea that was
 never actually run.
 
-ScholarLoop keeps the model doing the thinking and puts a harness around it that keeps the
-books. When an output breaks a rule, the harness rejects it, hands the errors back, and the
-model tries again. You stay at the decisions that need judgment.
+ScholarLoop splits the work three ways. The AI does the groundwork: it reads the literature,
+proposes directions and ideas, runs the experiments and drafts the paper. You guide the
+direction, discuss the ideas with it, and approve what goes forward. A harness of plain code
+sits around every model call. When an output breaks a rule, the harness rejects it, hands the
+errors back, and the model tries again.
+
+## 🤝 You and the AI, step by step
+
+A study moves through five stages. Each one is recorded before the next one reads it, so you can
+go back and see who decided what, and on which evidence.
+
+| Stage | The AI does | You decide | Code checks |
+|---|---|---|---|
+| **1 · Literature & directions** | retrieves papers, writes the review, and maps three to five directions, at least one of which must challenge your hunch | what you want to find out, and which directions to follow | every cited paper was retrieved |
+| **2 · Research ideas** | generates ideas from the papers and ranks them in a tournament | which idea to test; you can give feedback or add your own | a tournament win must hold in both presentation orders |
+| **3 · Experiments** | proposes training runs and edits the training script | when to stop, and whether to ask for a fixed protocol | scores come from a frozen scorer; the idea runs as a treatment against a matched control |
+| **4 · Scientific review** | four critics question every claim and can request experiments | whether to approve the argument | each claim's numbers are values of its measurements; approval is bound to the evidence |
+| **5 · Writing** | drafts the paper from approved statements; three simulated reviewers score it | the outline and the key points | every sentence cites an approved statement and uses only its numbers and sources |
 
 ## ✨ What it does
 
@@ -115,6 +149,25 @@ evidence behind each sentence. No API key, no GPU.
 
 Every script is listed in [`examples/README.md`](examples/README.md). `pytest -q` runs the
 offline tests.
+
+### Try the sentence check
+
+A recorded run ships with the package, so you can ask the check what its paper is allowed to
+say. A sentence passes when it cites an approved statement and its numbers are in that statement:
+
+```console
+$ scholarloop check "The column-drop-only arm scored 12.0833 validation error on the three evaluated folds [claim_coldrop_vs_control]."
+ACCEPTED
+
+$ scholarloop check "The column-drop-only arm scored 11.2 validation error on the three evaluated folds [claim_coldrop_vs_control]."
+REFUSED
+    - numbers ['11.2'] are not in the approved statements ['claim_coldrop_vs_control'] that this
+    sentence cites
+```
+
+`scholarloop statements` lists what a sentence may cite, `scholarloop trace "text"` follows a
+sentence of the paper to its statement, runs and values, and `scholarloop replay` walks through
+the whole run stage by stage.
 
 ## 🖥️ The web UI
 
@@ -211,7 +264,8 @@ Command lines and scripted modes for each stage are in [`REFERENCE.md`](REFERENC
 
 ## 🛡️ Rules the model cannot talk its way around
 
-These live in code. A prompt can ask for good behaviour; a check can refuse the output.
+These live in code. A prompt can only ask for good behaviour, and the model may ignore it. A
+check refuses the output.
 
 | Rule | What gets rejected |
 |---|---|
@@ -229,9 +283,10 @@ These live in code. A prompt can ask for good behaviour; a check can refuse the 
 Every attempt by every agent is logged with its output, its validation errors and its outcome,
 so the rejected attempts stay on the record too.
 
-## 📊 Checked, not just claimed
+## 📊 How well the checks work
 
-The checks are tested, not asserted. On three complete runs with `claude-opus-5-5`:
+We measured the checks by injecting faults into artifacts they had accepted. On three complete
+runs with `claude-opus-5-5`:
 
 <table>
 <tr>
@@ -240,6 +295,12 @@ The checks are tested, not asserted. On three complete runs with `claude-opus-5-
 <td align="center" width="33%"><h3>0–5% vs 7–20%</h3>claims that go beyond the evidence<br><sub>ScholarLoop paper vs a single-call writer</sub></td>
 </tr>
 </table>
+
+Code alone does not catch everything. When real evidence is put in the wrong place, such as a
+citation attached to the wrong claim, the checks caught 43 to 56% of the cases. The rest falls to
+model critics, and those are model judgments. The simulated reviewers also rejected all three
+papers: the checks make a paper traceable, and they have not been shown to make the research
+better. See the [known limits](REFERENCE.md#known-limits).
 
 ### Three recorded studies to explore
 

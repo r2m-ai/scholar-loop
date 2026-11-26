@@ -324,8 +324,10 @@ same rules as instructions.
 | Digits | 1 of 110 (1%) | 65 of 332 (20%) |
 
 Lower in every run. The caveats: one ScholarLoop paper per run, intervals that overlap on
-distillation, and a judge from the same model family as the reviewers. A blinded check of these
-labels by people is under way.
+distillation, and a judge from the same model family as the reviewers. Two people then labelled a
+blinded sample of 50 of these claims: they agreed with each other on 41 and with the judge on 39
+and 44. Two raters and a sample weighted towards flagged claims do not establish the judge's
+accuracy.
 
 ### Does enforcement change what a campaign tests?
 
