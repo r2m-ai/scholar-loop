@@ -371,6 +371,10 @@ def test_every_change_to_the_approved_evidence_stops_writing_and_undoing_it_rest
     assert e["n"] and e["blocked"] == e["by_gate"] == e["n"]
     assert set(e["by_kind"]) <= set(APPROVAL_KINDS) and {"training record", "scorer", "argument"} <= set(e["by_kind"])
     assert report["restored"]["writing_started"] == report["restored"]["n"]
+    # Reviewed again: evidence the review accepts is approved and written, the rest is refused.
+    assert e["review_refused"] + e["approved_again"] == e["n"] and e["review_refused"] and e["approved_again"]
+    assert e["then_written"] == e["approved_again"]
+    assert all(t["review_refusal"] for t in report["trials"] if t["reviewed_again"] == "refused")
     assert all("one" in t["change"] or "removed" in t["change"] or "added" in t["change"]
                or "changed" in t["change"] or "approv" in t["change"] for t in report["trials"])
     # No frozen protocol in this run, so an engine file that is neither entry point is not hashed.

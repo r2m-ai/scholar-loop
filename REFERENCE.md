@@ -329,24 +329,32 @@ flag out, or use Evaluation & Tools in the web UI.
 
 An approval is stored with a hash of the evidence it was given for. `scholarloop.reliability
 approval` copies a run, changes one record at a time, and starts the writing stage on the copy.
-A change counts as blocked when the writer makes no model call.
+A change counts as blocked when the writer makes no model call. The changed evidence is then
+reviewed again, with the approved argument and the four critics' recorded verdicts in place of
+the critics: either the review's own checks refuse it, or it is approved again and writing is
+started once more.
 
-| What changed | Distillation | AG News | Digits |
-|---|---|---|---|
-| A training record: one digit changed, a record removed or added | 38 of 38 | 179 of 179 | 172 of 172 |
-| Training code, as recorded or on disk | 28 of 28 | 52 of 52 | 68 of 68 |
-| The scorer | 4 of 4 | 4 of 4 | 3 of 3 |
-| A frozen protocol | 8 of 8 | none in this run | 8 of 8 |
-| The literature review or the brief | 8 of 8 | 8 of 8 | 8 of 8 |
-| An approved statement or a limitation | 23 of 23 | 28 of 28 | 27 of 27 |
-| The approval record | 3 of 3 | 3 of 3 | 3 of 3 |
-| All | 112 of 112 | 274 of 274 | 289 of 289 |
+| What changed | Changes | Writing blocked | Review refuses the change | Approved again, writing starts |
+|---|---|---|---|---|
+| A training record: one digit changed, a record removed or added | 389 | 389 | 314 | 75 |
+| Training code, as recorded or on disk | 148 | 148 | 140 | 8 |
+| An approved statement or a limitation | 78 | 78 | 25 | 53 |
+| The literature review or the brief | 24 | 24 | 5 | 19 |
+| A frozen protocol (two of the three runs have one) | 16 | 16 | 16 | 0 |
+| The scorer | 11 | 11 | 6 | 5 |
+| The approval record | 9 | 9 | 0 | 9 |
+| All | 675 | 675 | 506 | 169 |
 
-After each change was undone, writing started again in every case. The hash has a boundary. It
-covers the training entry point and the scorer, and a frozen protocol also covers every other
-source file of the engine. AG News ran no protocol, and there a change to another engine source
-file went unnoticed (0 of 2, against 2 of 2 on each of the other runs). The profile file is not
-changed in this study; a unit test covers it.
+By run, the totals are 112 (distillation), 274 (AG News) and 289 (Digits). The unchanged copies
+started writing, and after each change was undone writing started again in every case. A
+review refuses a change when a record no longer matches its hash or a statement no longer
+matches its measurements. The second review replays the critics, so it tests the gate and the
+review's deterministic checks, not what a critic would say about the new evidence.
+
+The hash has a boundary. It covers the training entry point and the scorer, and a frozen
+protocol also covers every other source file of the engine. AG News ran no protocol, and there a
+change to another engine source file went unnoticed (0 of 2, against 2 of 2 on each of the other
+runs). The profile file is not changed in this study; a unit test covers it.
 
 The reports are in `examples/sample_runs/*/reliability/approval.md`. The study needs an approval
 that still holds on your machine, so it runs on your own run, not on the copies in this

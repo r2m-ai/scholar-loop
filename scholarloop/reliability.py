@@ -722,13 +722,16 @@ def run_approval(profile, *, ledger, registry, research=None, review_dir, seed: 
 
     Everything happens on a copy. The writer is the production `WritingSession` with a model
     client that records calls and answers none: a change is blocked when no call was made.
-    After every change the file is restored and the approval must hold again.
+    The changed evidence is then put through the production review again, with the four critics
+    answering as they did in the recorded run, and approved if the review accepts it. After
+    every change the files are restored and the approval must hold again.
     """
     import tempfile
 
     from scholarloop.core.llm import MockLLM
     from scholarloop.review.contracts import ReviewBlocked
     from scholarloop.review.dossier import snapshot
+    from scholarloop.review.session import ScientificReviewSession
     from scholarloop.writing.session import WritingSession
     rng, trials = random.Random(f"approval:{seed}"), []
     with tempfile.TemporaryDirectory() as tmp:
@@ -751,19 +754,46 @@ def run_approval(profile, *, ledger, registry, research=None, review_dir, seed: 
 
         calls, reason, _ = start_writing()
         if not calls:
-            return {"version": 1, "error": f"The approval does not hold on this machine before any change: {reason}"}
+            return {"version": 2, "error": f"The approval does not hold on this machine before any change: {reason}"}
         files = snapshot(box["profile"], box["ledger"], box["registry"], box["research"])["files"]
+        review_file = box["run"] / ScientificReviewSession.STATE_FILE
         restored = 0
+
+        def review_again():
+            """Review the changed evidence and approve it: "written" when writing then starts,
+            "blocked" when it does not, "refused" when the review does not accept the evidence.
+
+            The argument is the approved one and the critics are replaced by their recorded
+            verdicts, so this exercises the gate and the deterministic review checks, not the
+            critics' judgment."""
+            try:
+                state = json.loads(review_file.read_text(encoding="utf-8"))
+                verdicts = [{"verdict": "pass", "summary": r["summary"], "issues": [], "dispositions": [],
+                             "claim_checks": r["claim_checks"]} for r in state["reports"]]
+                session = ScientificReviewSession(MockLLM(jsons=verdicts), box["profile"], box["run"],
+                                                  ledger_path=box["ledger"], registry_dir=box["registry"],
+                                                  research_dir=box["research"])
+                after = session.review(argument=state["dossier"]["argument"], feedback=state.get("feedback", ""))
+                if after["status"] != "READY_FOR_AUTHOR":
+                    return "refused", after["status"]
+                session.approve(author="Researcher", review_hash=after["review_hash"])
+            except Exception as exc:        # the review rejected the evidence, or could not read it
+                return "refused", re.sub(r"[0-9a-f]{12,}", "<id>", f"{type(exc).__name__}: {exc}".replace(tmp, "<copy>"))[:160]
+            return ("written" if start_writing()[0] else "blocked"), ""
 
         def trial(tier, kind, change, path, new):
             nonlocal restored
             before = path.read_bytes() if path.exists() else None
+            review_before = review_file.read_bytes()
             path.unlink() if new is None else path.write_text(new, encoding="utf-8")
             calls, reason, by_gate = start_writing()
             reason = re.sub(r"(candidate|missing:) \S+$", r"\1 <file>", reason.replace(tmp, "<copy>"))
+            again, why = review_again()
             trials.append({"tier": tier, "kind": kind, "change": change, "blocked": not calls,
-                           "by_gate": by_gate, "reason": reason})
+                           "by_gate": by_gate, "reason": reason, "reviewed_again": again,
+                           "review_refusal": why})
             path.unlink() if before is None else path.write_bytes(before)
+            review_file.write_bytes(review_before)
             restored += bool(start_writing()[0])
 
         for kind, change, path, new in _approval_changes(box, files, rng, per_file):
@@ -785,22 +815,32 @@ def run_approval(profile, *, ledger, registry, research=None, review_dir, seed: 
         for t in rows:
             groups[t["kind"]].append(t)
         return {k: {"n": len(v), "blocked": sum(t["blocked"] for t in v),
-                    "by_gate": sum(t["by_gate"] for t in v)} for k, v in sorted(groups.items())}
+                    "by_gate": sum(t["by_gate"] for t in v), **again(v)} for k, v in sorted(groups.items())}
+
+    def again(rows):
+        return {"review_refused": sum(t["reviewed_again"] == "refused" for t in rows),
+                "approved_again": sum(t["reviewed_again"] != "refused" for t in rows),
+                "then_written": sum(t["reviewed_again"] == "written" for t in rows)}
 
     inside = [t for t in trials if t["tier"] == "approved evidence"]
     outside = [t for t in trials if t["tier"] != "approved evidence"]
-    return {"version": 1, "seed": seed, "per_file": per_file,
+    return {"version": 2, "seed": seed, "per_file": per_file,
             "interpretation": "Single changes to the evidence a researcher approved, made on a copy of "
                               "the run, followed by an attempt to start writing. Blocked: the writer "
-                              "made no model call. The profile file is not changed here.",
+                              "made no model call. The changed evidence is then reviewed again with the "
+                              "critics' recorded verdicts and, if the review accepts it, approved. The "
+                              "profile file is not changed here.",
             "unchanged": {"writing_started": True},
             "files_hashed": len(files), "protocols": sum(n.startswith("protocols/") and
                                                          not n.endswith(".analysis.json") for n in files),
             "approved_evidence": {"n": len(inside), "blocked": sum(t["blocked"] for t in inside),
-                                  "by_gate": sum(t["by_gate"] for t in inside), "by_kind": table(inside)},
+                                  "by_gate": sum(t["by_gate"] for t in inside), **again(inside),
+                                  "by_kind": table(inside)},
             "other_engine_source": {"n": len(outside), "blocked": sum(t["blocked"] for t in outside)},
             "restored": {"n": len(trials), "writing_started": restored},
             "reasons": dict(Counter(t["reason"] for t in trials if t["blocked"]).most_common()),
+            "review_refusals": dict(Counter(re.sub(r"(Invalid claim graph: )\S+: (.{0,40}).*", r"\1<statement>: \2", t["review_refusal"])
+                                            for t in inside if t["reviewed_again"] == "refused").most_common()),
             "trials": trials}
 
 
@@ -811,14 +851,22 @@ def render_approval(report: dict) -> str:
     lines = ["# Approval invalidation", "", report["interpretation"], "",
              f"Seed {report['seed']}, up to {report['per_file']} edits per file. {report['files_hashed']} "
              f"files in the evidence hash, {report['protocols']} frozen protocol(s). Unchanged copy: writing started.",
-             "", "| what changed | changes | writing blocked | refused by the approval check |", "|---|---|---|---|"]
-    lines += [f"| {kind} | {row['n']} | {row['blocked']} | {row['by_gate']} |" for kind, row in e["by_kind"].items()]
-    lines += [f"| all approved evidence | {e['n']} | {e['blocked']} | {e['by_gate']} |", "",
+             "", "| what changed | changes | writing blocked | refused by the approval check "
+                 "| review refuses the changed evidence | reviewed and approved again | then writing starts |",
+             "|---|---|---|---|---|---|---|"]
+    cells = lambda row: (f"{row['n']} | {row['blocked']} | {row['by_gate']} | {row['review_refused']} | "
+                         f"{row['approved_again']} | {row['then_written']}")
+    lines += [f"| {kind} | {cells(row)} |" for kind, row in e["by_kind"].items()]
+    lines += [f"| all approved evidence | {cells(e)} |", "",
+              "The second review uses the approved argument and the critics' recorded verdicts, so it shows "
+              "what the deterministic review checks and the gate do, not what a critic would say.", "",
               f"After each change was undone, writing started again in {r['writing_started']} of {r['n']} cases.", "",
               f"Engine source other than the training entry point and the scorer: {o['blocked']} of {o['n']} "
               "changes blocked. Such a file is hashed only by a frozen protocol.", "",
               "## Why writing stopped", "", "| reason | changes |", "|---|---|"]
     lines += [f"| {reason} | {n} |" for reason, n in report["reasons"].items()]
+    lines += ["", "## Why the second review refused the changed evidence", "", "| reason | changes |", "|---|---|"]
+    lines += [f"| {reason} | {n} |" for reason, n in report["review_refusals"].items()]
     return "\n".join(lines) + "\n"
 
 
