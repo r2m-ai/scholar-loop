@@ -2,7 +2,7 @@
 
 Detection of single-site injected faults by the production postchecks. Fabrication faults refer to something absent from the evidence; misattribution faults use real evidence in the wrong place. In legacy mode a lexical check cannot see misattribution. In reviewed mode numbers are bound to the statements a sentence cites, so part of it is visible.
 
-Guard mode: reviewed. Seed 0, at most 8 sites per fault and artifact. Unmodified controls: 0 of 14 accepted artifacts rejected.
+Guard mode: reviewed, against the release as recorded (not re-validated on this machine). Seed 0, at most 8 sites per fault and artifact. Unmodified controls: 0 of 14 accepted artifacts rejected.
 
 ## Detection by fault
 
@@ -21,12 +21,12 @@ Guard mode: reviewed. Seed 0, at most 8 sites per fault and artifact. Unmodified
 | misattribution | misattributed_number | 67/69 (97%, 95% CI 90-99) |
 | misattribution | miscitation | 0/13 (0%, 95% CI 0-23) |
 | misattribution | wrong_run_id | 15/19 (79%, 95% CI 57-91) |
-| misattribution | wrong_statement_id | 37/94 (39%, 95% CI 30-49) |
+| misattribution | wrong_statement_id | 39/94 (41%, 95% CI 32-52) |
 
 | tier | detected |
 |---|---|
 | fabrication | 354/354 (100%, 95% CI 99-100) |
-| misattribution | 135/256 (53%, 95% CI 47-59) |
+| misattribution | 137/256 (54%, 95% CI 47-60) |
 
 ## Where faults pass, by pipeline stage
 
@@ -64,7 +64,7 @@ Guard mode: reviewed. Seed 0, at most 8 sites per fault and artifact. Unmodified
 | misattribution | wrong_run_id | section | 7/11 (64%, 95% CI 35-85) |
 | misattribution | wrong_statement_id | key_points | 8/8 (100%, 95% CI 68-100) |
 | misattribution | wrong_statement_id | outline | 0/8 (0%, 95% CI 0-32) |
-| misattribution | wrong_statement_id | section | 29/78 (37%, 95% CI 27-48) |
+| misattribution | wrong_statement_id | section | 31/78 (40%, 95% CI 30-51) |
 
 ## Ablation (one guard disabled at a time)
 
@@ -73,7 +73,10 @@ Only guards whose removal changes the count are listed.
 | tier | configuration | detected |
 |---|---|---|
 | fabrication | all_guards | 354/354 (100%, 95% CI 99-100) |
-| fabrication | without_citation | 319/354 (90%, 95% CI 87-93) |
-| fabrication | without_structure | 35/354 (10%, 95% CI 7-13) |
-| misattribution | all_guards | 135/256 (53%, 95% CI 47-59) |
-| misattribution | without_structure | 0/256 (0%, 95% CI 0-1) |
+| fabrication | without_citation | 82/354 (23%, 95% CI 19-28) |
+| fabrication | without_number | 301/354 (85%, 95% CI 81-88) |
+| fabrication | without_structure | 325/354 (92%, 95% CI 88-94) |
+| misattribution | all_guards | 137/256 (54%, 95% CI 47-60) |
+| misattribution | without_citation | 104/256 (41%, 95% CI 35-47) |
+| misattribution | without_number | 60/256 (23%, 95% CI 19-29) |
+| misattribution | without_structure | 121/256 (47%, 95% CI 41-53) |

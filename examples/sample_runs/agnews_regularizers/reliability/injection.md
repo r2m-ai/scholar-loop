@@ -2,7 +2,7 @@
 
 Detection of single-site injected faults by the production postchecks. Fabrication faults refer to something absent from the evidence; misattribution faults use real evidence in the wrong place. In legacy mode a lexical check cannot see misattribution. In reviewed mode numbers are bound to the statements a sentence cites, so part of it is visible.
 
-Guard mode: reviewed. Seed 0, at most 8 sites per fault and artifact. Unmodified controls: 0 of 15 accepted artifacts rejected.
+Guard mode: reviewed, against the release as recorded (not re-validated on this machine). Seed 0, at most 8 sites per fault and artifact. Unmodified controls: 0 of 15 accepted artifacts rejected.
 
 ## Detection by fault
 
@@ -69,7 +69,10 @@ Only guards whose removal changes the count are listed.
 | tier | configuration | detected |
 |---|---|---|
 | fabrication | all_guards | 360/360 (100%, 95% CI 99-100) |
-| fabrication | without_citation | 320/360 (89%, 95% CI 85-92) |
-| fabrication | without_structure | 40/360 (11%, 95% CI 8-15) |
+| fabrication | without_citation | 82/360 (23%, 95% CI 19-27) |
+| fabrication | without_number | 306/360 (85%, 95% CI 81-88) |
+| fabrication | without_structure | 333/360 (92%, 95% CI 89-95) |
 | misattribution | all_guards | 123/221 (56%, 95% CI 49-62) |
-| misattribution | without_structure | 0/221 (0%, 95% CI 0-2) |
+| misattribution | without_citation | 100/221 (45%, 95% CI 39-52) |
+| misattribution | without_number | 43/221 (19%, 95% CI 15-25) |
+| misattribution | without_structure | 109/221 (49%, 95% CI 43-56) |

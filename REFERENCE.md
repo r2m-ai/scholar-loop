@@ -305,7 +305,7 @@ runs each variant through the production check: 1,627 injected faults over the t
 | Kind of fault | Example | Distillation | AG News | Digits |
 |---|---|---|---|---|
 | Fabrication | a citation, run id or number that does not exist | 257 of 257 | 360 of 360 | 354 of 354 |
-| Misattribution | a real measurement in the wrong place; "lower" flipped to "higher" | 77 of 179 (43%) | 123 of 221 (56%) | 135 of 256 (53%) |
+| Misattribution | a real measurement in the wrong place; "lower" flipped to "higher" | 77 of 179 (43%) | 123 of 221 (56%) | 137 of 256 (54%) |
 | Clean artifact rejected | an unchanged artifact | 0 of 12 | 0 of 15 | 0 of 14 |
 
 A check that looks up whether something exists cannot tell whether it is used correctly. A
