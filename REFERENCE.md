@@ -410,6 +410,8 @@ corrections are welcome.
 Marks: **yes** code enforces it by default; **optional** it exists but is off by default or
 applies in one mode only; **partial** code enforces it for part of the pipeline; **model** it is
 an instruction to a model or a model's judgment; **none** no description found.
+Injection-tested counts a reported evaluation that inserts known faults; unit tests are not
+counted, for any system.
 
 | System | Repository | Commit |
 |---|---|---|
@@ -425,7 +427,7 @@ an instruction to a model or a model's judgment; **none** no description found.
 | AI Scientist-v2 | Researcher decisions | partial | Ideation and experiments are separate commands and the user passes the index of the idea to run; there is no approval step | README, `launch_scientist_bfts.py` |
 | | Dollar cap | none | Cost is tallied after the run; nothing limits it | `ai_scientist/utils/token_tracker.py` |
 | | Scorer outside agent | none | The agent writes the experiment and the code that parses its metrics | `ai_scientist/treesearch/parallel_agent.py` |
-| | Frozen protocol | partial | The harness sets the seeds that replicate each stage's best node; the configurations compared and a falsifying outcome are not fixed | `parallel_agent.py`, `bfts_config.yaml` |
+| | Frozen protocol | partial | The harness sets the seeds that replicate each stage's best node; the configurations compared and a falsifying outcome are not fixed | `ai_scientist/treesearch/parallel_agent.py`, `bfts_config.yaml` |
 | | Sentence binding | model | A prompt instruction not to report results absent from the logs | `ai_scientist/perform_icbinb_writeup.py` |
 | | Injection-tested | none | | |
 | Agent Laboratory | Researcher decisions | optional | Co-pilot mode is one of two modes and is off by default | `ai_lab_repo.py`, paper §3.3.1 |
@@ -435,14 +437,14 @@ an instruction to a model or a model's judgment; **none** no description found.
 | | Sentence binding | none | | |
 | | Injection-tested | none | | |
 | TinyScientist | Researcher decisions | optional | The web interface advances stage by stage; the Python interface and the demo script do not pause | `backend/app.py`, `examples/demo.py` |
-| | Dollar cap | optional | The budget is unset by default; when set, exceeding it raises an error | `tiny_scientist/scientist.py`, `budget_checker.py` |
+| | Dollar cap | optional | The budget is unset by default; when set, exceeding it raises an error | `tiny_scientist/scientist.py`, `tiny_scientist/budget_checker.py` |
 | | Scorer outside agent | model | A model validator flags placeholder metrics; the metrics come from the agent's code | `tiny_scientist/coder.py` |
 | | Frozen protocol | model | The same validator checks the code against the planned experiment table | `tiny_scientist/coder.py` |
 | | Sentence binding | none | | |
 | | Injection-tested | partial | The safety checker is tested on known unsafe requests; no faults are inserted into experiments or the paper | paper §6.1–6.2 |
 | Dr. Claw | Researcher decisions | yes | The user dispatches tasks one at a time; an automatic mode is opt-in | README, `server/routes/auto-research.js` |
 | | Dollar cap | none | Token usage is displayed; there is no limit | `server/claude-sdk.js` |
-| | Scorer outside agent | none | A model reviews the implementation | `skills/inno-experiment-dev/SKILL.md` |
+| | Scorer outside agent | model | The agent is told not to change metric definitions or evaluation logic and not to modify guard or test files; a model judges the implementation | `skills/ds-experiment/SKILL.md`, `skills/autoresearch/SKILL.md`, `skills/inno-experiment-dev/SKILL.md` |
 | | Frozen protocol | model | Instructions to the agent | `skills/aris-experiment-plan/SKILL.md` |
 | | Sentence binding | model | The agent is told to write a map from claims to evidence; no code checks it | `skills/ds-write/SKILL.md` |
 | | Injection-tested | partial | One induced error, shown as a recovery demonstration | paper §5.2 |
@@ -455,12 +457,14 @@ an instruction to a model or a model's judgment; **none** no description found.
 | data-to-paper | Researcher decisions | yes | Human review is on by default and the run waits for it | `src/data_to_paper/env.py` |
 | | Dollar cap | none | Cost is tracked and displayed | `src/data_to_paper/servers/llm_call.py` |
 | | Scorer outside agent | partial | Analysis code is model-written but runs inside wrappers of the statistics libraries | `src/data_to_paper/run_gpt_code/overrides/` |
-| | Frozen protocol | partial | A hypothesis and plan stage precedes analysis and the seed is fixed; adherence is not checked by code | `research_types/hypothesis_testing/scientific_stage.py` |
+| | Frozen protocol | partial | A hypothesis and plan stage precedes analysis and the seed is fixed; adherence is not checked by code | `src/data_to_paper/research_types/hypothesis_testing/scientific_stage.py` |
 | | Sentence binding | partial | Code rejects a number in the Results section that does not link to an output; other sections are not checked | `src/data_to_paper/base_steps/base_products_conversers.py` |
 | | Injection-tested | none | | |
 
-ScholarLoop's own row: a protocol is frozen on request, so that cell is **optional**. Its
-injection covers the output checks and the approval, not the rules that act during experiments.
+ScholarLoop's own row: a protocol is frozen on request, so that cell is **optional**. The
+dollar cap is always applied in the web interface (default $10); on the command line it applies
+when `SCHOLARLOOP_SPEND_CAP` is set. Its injection covers the output checks and the approval,
+not the rules that act during experiments.
 
 ## Known limits
 
