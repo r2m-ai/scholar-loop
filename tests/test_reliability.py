@@ -358,3 +358,46 @@ def test_ablation_reruns_a_stage_whose_panel_ran_out_of_rounds_once(tmp_path, mo
     (tmp_path / "stuck").mkdir()
     stuck = run_ablation(None, None, paths, tmp_path / "stuck", "full", repeats=1)["papers"][0]
     assert not stuck["completed"] and stuck["stopped_at"] == "draft" and stuck["reruns"] == ["key_points"]
+
+
+# ---- approval invalidation: a change to the approved evidence stops writing -------------------
+def test_every_change_to_the_approved_evidence_stops_writing_and_undoing_it_restores_it(reviewed_run):
+    from scholarloop.reliability import APPROVAL_KINDS, render_approval, run_approval
+    profile, paths = reviewed_run
+    before = {f: f.read_bytes() for f in paths["research"].parent.rglob("*") if f.is_file()}
+    report = run_approval(profile, ledger=paths["ledger"], registry=paths["registry"],
+                          review_dir=paths["research"])
+    e = report["approved_evidence"]
+    assert e["n"] and e["blocked"] == e["by_gate"] == e["n"]
+    assert set(e["by_kind"]) <= set(APPROVAL_KINDS) and {"training record", "scorer", "argument"} <= set(e["by_kind"])
+    assert report["restored"]["writing_started"] == report["restored"]["n"]
+    assert all("one" in t["change"] or "removed" in t["change"] or "added" in t["change"]
+               or "changed" in t["change"] or "approv" in t["change"] for t in report["trials"])
+    # No frozen protocol in this run, so an engine file that is neither entry point is not hashed.
+    assert report["protocols"] == 0 and report["other_engine_source"]["blocked"] == 0
+    assert "writing started again" in render_approval(report)
+    assert before == {f: f.read_bytes() for f in paths["research"].parent.rglob("*") if f.is_file()}  # the run is untouched
+
+
+def test_approval_study_refuses_a_run_whose_approval_does_not_hold(reviewed_run, tmp_path, capsys):
+    profile, paths = reviewed_run
+    paths["ledger"].write_text(paths["ledger"].read_text(encoding="utf-8").replace("7.25", "6.25"), encoding="utf-8")
+    out = tmp_path / "report"
+    code = main(["approval", "--profile", str(profile.source_path), "--run", str(paths["research"].parent),
+                 "--ledger", str(paths["ledger"]), "--registry", str(paths["registry"]),
+                 "--review-dir", str(paths["research"]), "--out", str(out)])
+    assert code == 1 and "does not hold" in capsys.readouterr().out
+    assert "error" in json.loads((out / "approval.json").read_text(encoding="utf-8"))
+
+
+def test_one_digit_edits_keep_a_number_a_number():
+    import random
+
+    from scholarloop.reliability import _edit_one_digit
+    rng = random.Random(0)
+    for text in ('{"a": 10, "b": 0.5}', '{"a": 1}', '{"a": 90}'):
+        for _ in range(20):
+            edited = _edit_one_digit(text, rng)
+            assert edited != text and json.loads(edited) and len(edited) == len(text)
+    assert _edit_one_digit("no digits", rng) == "no digits\n# edited\n"
+    assert _edit_one_digit("abc def", rng, (0, 3)) == "abc edited def"

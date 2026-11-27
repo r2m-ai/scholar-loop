@@ -19,6 +19,11 @@ Three measurements, each answering a different question. None uses an LLM judge.
             This isolates "the rule is in the prompt" from "the rule is enforced".
             Uses the configured API and can incur charges.
 
+  approval  Whether a change to the approved evidence stops writing. The inputs of a
+            recorded run are copied, one record is changed, removed or added at a time, and
+            the production writing stage is started on the copy. A change counts as blocked
+            when the writer makes no model call. Free and deterministic.
+
 What the numbers do not show: that a paper passing these checks is scientifically correct,
 or that injected faults are distributed like a model's natural errors (`traces` measures
 those). Detection of a fabrication the checker was written to catch is expected to be high;
@@ -586,6 +591,238 @@ def render_injection(report: dict) -> str:
 
 
 # ---------------------------------------------------------------------------------------------
+# Approval invalidation: does a change to the approved evidence stop writing?
+# ---------------------------------------------------------------------------------------------
+APPROVAL_KINDS = ("training record", "training code", "scorer", "protocol", "literature and brief",
+                  "argument", "approval record")
+_DIGIT = re.compile(r"\d")
+
+
+def _edit_one_digit(text: str, rng, span=None) -> str:
+    """Change one digit of `text` (within `span` if given). A digit never becomes 0, so a JSON
+    number stays a JSON number. Text without a digit gets one appended line."""
+    lo, hi = span or (0, len(text))
+    sites = [m.start() for m in _DIGIT.finditer(text, lo, hi)]
+    if not sites:
+        return text[:hi] + (" edited" if span else "\n# edited\n") + text[hi:]
+    i = rng.choice(sites)
+    d = int(text[i])
+    return text[:i] + str(d - 1 if d > 1 else d + 1) + text[i + 1:]
+
+
+def _relocated(profile, root: Path):
+    """The same profile with its engine files read from `root`. Its fields, and so its part of
+    the evidence hash, are unchanged."""
+    import dataclasses
+    cls = type("RelocatedProfile", (type(profile),), {"root": property(lambda self: root)})
+    return cls(**{f.name: getattr(profile, f.name) for f in dataclasses.fields(profile)})
+
+
+def _copy_run(profile, sandbox: Path, *, ledger, registry, research, review_dir) -> dict:
+    """Copy what the evidence hash reads: the engine sources, the ledger, the registry, the
+    literature files and the review state. The profile file itself stays where it is."""
+    import shutil
+
+    from scholarloop.experiment.test_boundary import access_directory
+    from scholarloop.review.session import ScientificReviewSession
+    root, engine = profile.root.resolve(), sandbox / "engine"
+    sources = set((root / profile.train_entrypoint).parent.rglob("*.py")) | {root / profile.fixed_module}
+    registry = Path(registry)
+    for envelope in sorted((registry / "protocols").glob("*.json")):
+        if not envelope.name.endswith(".analysis.json"):
+            spec = json.loads(envelope.read_text(encoding="utf-8")).get("spec") or {}
+            sources.update(root / f for f in spec.get("data_files", []))
+    for src in sources:
+        if "__pycache__" not in src.parts and src.is_file():
+            dst = engine / src.resolve().relative_to(root)
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
+    run = sandbox / "run"
+    run.mkdir(parents=True)
+    shutil.copy2(ledger, run / "experiments.jsonl")
+    shutil.copytree(registry, run / "registry")
+    access = access_directory(Path(ledger))
+    if access.is_dir():
+        shutil.copytree(access, access_directory(run / "experiments.jsonl"))
+    if research:
+        for name in ("lit_review.json", "handoff.json", "research_brief.json"):
+            if (Path(research) / name).is_file():
+                shutil.copy2(Path(research) / name, run / name)
+    shutil.copy2(Path(review_dir) / ScientificReviewSession.STATE_FILE, run / ScientificReviewSession.STATE_FILE)
+    return {"profile": _relocated(profile, engine), "run": run, "ledger": run / "experiments.jsonl",
+            "registry": run / "registry", "research": run if research else None,
+            "state": run / ScientificReviewSession.STATE_FILE}
+
+
+def _approval_changes(box: dict, files: dict, rng, per_file: int):
+    """Yield (kind, change, path, new text or None to delete). One site per change."""
+    def kind_of(name):
+        if name == "ledger" or name.startswith(("registry/", "test_access/")):
+            return "training record"
+        if name == "train" or name.startswith("candidates/"):
+            return "training code"
+        if name == "scorer":
+            return "scorer"
+        if name.startswith("protocols/"):
+            return "protocol"
+        return "literature and brief"
+
+    for name, record in sorted(files.items()):
+        if name == "profile" or record["text"] is None:
+            continue
+        path, text = Path(record["path"]), record["text"]
+        if name == "ledger":                        # one training run per row
+            rows = text.splitlines(keepends=True)
+            offsets = [sum(len(r) for r in rows[:i]) for i in range(len(rows))]
+            for i, row in enumerate(rows):
+                if row.strip():
+                    yield "training record", f"ledger row {i + 1}: one digit changed", path, \
+                        _edit_one_digit(text, rng, (offsets[i], offsets[i] + len(row.rstrip("\n"))))
+                    yield "training record", f"ledger row {i + 1}: removed", path, "".join(rows[:i] + rows[i + 1:])
+            last = [r for r in rows if r.strip()][-1]
+            yield "training record", "ledger: a row added", path, text + ("" if text.endswith("\n") else "\n") + last
+            continue
+        seen = set()
+        for _ in range(per_file):
+            edited = _edit_one_digit(text, rng)
+            if edited not in seen:
+                seen.add(edited)
+                yield kind_of(name), f"{name}: one digit changed", path, edited
+        yield kind_of(name), f"{name}: removed", path, None
+    first = sorted(box["registry"].glob("*.json"))
+    if first:
+        yield "training record", "registry: a record added", box["registry"] / "exp_9999.json", \
+            first[0].read_text(encoding="utf-8")
+
+    state_text = box["state"].read_text(encoding="utf-8")
+    state = json.loads(state_text)
+
+    def rewritten(edit):
+        changed = copy.deepcopy(state)
+        edit(changed)
+        return json.dumps(changed, indent=2, ensure_ascii=False)
+
+    argument = state["dossier"]["argument"]
+    for i, claim in enumerate(argument.get("claims", [])):
+        new = _edit_one_digit(claim["text"], rng, (0, len(claim["text"])))
+        yield "argument", f"statement {claim.get('id', i)}: text changed", box["state"], \
+            rewritten(lambda s, i=i, new=new: s["dossier"]["argument"]["claims"][i].update(text=new))
+    for i in range(len(argument.get("limitations", []))):
+        yield "argument", f"limitation {i + 1}: removed", box["state"], \
+            rewritten(lambda s, i=i: s["dossier"]["argument"]["limitations"].pop(i))
+    yield "approval record", "approver renamed", box["state"], \
+        rewritten(lambda s: s["release"]["author_decision"].update(actor="someone else"))
+    yield "approval record", "approval recorded as made by a model", box["state"], \
+        rewritten(lambda s: s["release"]["author_decision"].update(kind="model"))
+    yield "approval record", "approval removed", box["state"], rewritten(lambda s: s.update(release=None))
+
+
+def run_approval(profile, *, ledger, registry, research=None, review_dir, seed: int = 0, per_file: int = 3) -> dict:
+    """Change the approved evidence of a recorded run, one site at a time, and start writing.
+
+    Everything happens on a copy. The writer is the production `WritingSession` with a model
+    client that records calls and answers none: a change is blocked when no call was made.
+    After every change the file is restored and the approval must hold again.
+    """
+    import tempfile
+
+    from scholarloop.core.llm import MockLLM
+    from scholarloop.review.contracts import ReviewBlocked
+    from scholarloop.review.dossier import snapshot
+    from scholarloop.writing.session import WritingSession
+    rng, trials = random.Random(f"approval:{seed}"), []
+    with tempfile.TemporaryDirectory() as tmp:
+        box = _copy_run(profile, Path(tmp), ledger=ledger, registry=registry, research=research,
+                        review_dir=review_dir)
+        attempts = iter(range(10 ** 9))
+
+        def start_writing():
+            """(model calls made, why writing stopped, whether the approval gate stopped it)."""
+            llm = MockLLM()
+            try:
+                WritingSession(llm, box["profile"], Path(tmp) / "writing" / str(next(attempts)),
+                               ledger_path=box["ledger"], registry_dir=box["registry"],
+                               research_dir=box["research"], review_dir=box["run"]).outline()
+            except ReviewBlocked as exc:
+                return len(llm.calls), str(exc), True
+            except Exception as exc:    # the unanswered model call, or records too damaged to load
+                return len(llm.calls), f"{type(exc).__name__}: {exc}"[:200], False
+            return len(llm.calls), "", False
+
+        calls, reason, _ = start_writing()
+        if not calls:
+            return {"version": 1, "error": f"The approval does not hold on this machine before any change: {reason}"}
+        files = snapshot(box["profile"], box["ledger"], box["registry"], box["research"])["files"]
+        restored = 0
+
+        def trial(tier, kind, change, path, new):
+            nonlocal restored
+            before = path.read_bytes() if path.exists() else None
+            path.unlink() if new is None else path.write_text(new, encoding="utf-8")
+            calls, reason, by_gate = start_writing()
+            reason = re.sub(r"(candidate|missing:) \S+$", r"\1 <file>", reason.replace(tmp, "<copy>"))
+            trials.append({"tier": tier, "kind": kind, "change": change, "blocked": not calls,
+                           "by_gate": by_gate, "reason": reason})
+            path.unlink() if before is None else path.write_bytes(before)
+            restored += bool(start_writing()[0])
+
+        for kind, change, path, new in _approval_changes(box, files, rng, per_file):
+            trial("approved evidence", kind, change, path, new)
+        # Outside the hashed files: an engine source that is neither the training entry point
+        # nor the scorer. A frozen protocol hashes it; a campaign does not.
+        engine = box["profile"].root / Path(profile.train_entrypoint).parent
+        named = {(box["profile"].root / profile.train_entrypoint).resolve(),
+                 (box["profile"].root / profile.fixed_module).resolve()}
+        for other in sorted(p for p in engine.rglob("*.py") if p.resolve() not in named):
+            trial("other engine source", "other engine source",
+                  f"{other.relative_to(box['profile'].root)}: one line added", other,
+                  other.read_text(encoding="utf-8") + "\n# edited\n")
+        trial("other engine source", "other engine source", "a source file added", engine / "added_module.py",
+              "# added\n")
+
+    def table(rows):
+        groups = defaultdict(list)
+        for t in rows:
+            groups[t["kind"]].append(t)
+        return {k: {"n": len(v), "blocked": sum(t["blocked"] for t in v),
+                    "by_gate": sum(t["by_gate"] for t in v)} for k, v in sorted(groups.items())}
+
+    inside = [t for t in trials if t["tier"] == "approved evidence"]
+    outside = [t for t in trials if t["tier"] != "approved evidence"]
+    return {"version": 1, "seed": seed, "per_file": per_file,
+            "interpretation": "Single changes to the evidence a researcher approved, made on a copy of "
+                              "the run, followed by an attempt to start writing. Blocked: the writer "
+                              "made no model call. The profile file is not changed here.",
+            "unchanged": {"writing_started": True},
+            "files_hashed": len(files), "protocols": sum(n.startswith("protocols/") and
+                                                         not n.endswith(".analysis.json") for n in files),
+            "approved_evidence": {"n": len(inside), "blocked": sum(t["blocked"] for t in inside),
+                                  "by_gate": sum(t["by_gate"] for t in inside), "by_kind": table(inside)},
+            "other_engine_source": {"n": len(outside), "blocked": sum(t["blocked"] for t in outside)},
+            "restored": {"n": len(trials), "writing_started": restored},
+            "reasons": dict(Counter(t["reason"] for t in trials if t["blocked"]).most_common()),
+            "trials": trials}
+
+
+def render_approval(report: dict) -> str:
+    if report.get("error"):
+        return report["error"] + "\n"
+    e, o, r = report["approved_evidence"], report["other_engine_source"], report["restored"]
+    lines = ["# Approval invalidation", "", report["interpretation"], "",
+             f"Seed {report['seed']}, up to {report['per_file']} edits per file. {report['files_hashed']} "
+             f"files in the evidence hash, {report['protocols']} frozen protocol(s). Unchanged copy: writing started.",
+             "", "| what changed | changes | writing blocked | refused by the approval check |", "|---|---|---|---|"]
+    lines += [f"| {kind} | {row['n']} | {row['blocked']} | {row['by_gate']} |" for kind, row in e["by_kind"].items()]
+    lines += [f"| all approved evidence | {e['n']} | {e['blocked']} | {e['by_gate']} |", "",
+              f"After each change was undone, writing started again in {r['writing_started']} of {r['n']} cases.", "",
+              f"Engine source other than the training entry point and the scorer: {o['blocked']} of {o['n']} "
+              "changes blocked. Such a file is hashed only by a frozen protocol.", "",
+              "## Why writing stopped", "", "| reason | changes |", "|---|---|"]
+    lines += [f"| {reason} | {n} |" for reason, n in report["reasons"].items()]
+    return "\n".join(lines) + "\n"
+
+
+# ---------------------------------------------------------------------------------------------
 # Natural fault rate from persisted agent traces
 # ---------------------------------------------------------------------------------------------
 def natural_faults(paths) -> dict:
@@ -1086,6 +1323,11 @@ def main(argv=None) -> int:
     p.add_argument("--recorded-release", action="store_true",
                    help="for a copied run such as a shipped sample: check against the approved "
                         "evidence as recorded, without re-validating the release on this machine")
+    p = sub.add_parser("approval", help="change the approved evidence on a copy of the run and "
+                                        "start writing (free, deterministic)")
+    run_args(p)
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--per-file", type=int, default=3)
     p = sub.add_parser("traces", help="natural fault rate from *.agents.jsonl (free)")
     p.add_argument("--traces", nargs="+", required=True, help="trace files or directories")
     p.add_argument("--out", required=True)
@@ -1135,6 +1377,14 @@ def main(argv=None) -> int:
              "research": a.research or run, "writing": a.writing or run / "writing.json",
              "review_dir": a.review_dir}
     profile = load_profile(a.profile)
+    if a.command == "approval":
+        report = run_approval(profile, ledger=paths["ledger"], registry=paths["registry"],
+                              research=paths["research"], review_dir=a.review_dir or run,
+                              seed=a.seed, per_file=a.per_file)
+        (out / "approval.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        (out / "approval.md").write_text(render_approval(report), encoding="utf-8")
+        print(render_approval(report))
+        return 1 if report.get("error") else 0
     cases, ctx = load_cases(profile, **paths, recorded_release=getattr(a, "recorded_release", False))
 
     if a.command == "inject":

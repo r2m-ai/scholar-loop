@@ -325,6 +325,38 @@ tied to the machine and paths of the run that produced it, so `--recorded-releas
 copy in this repository against its approved evidence as recorded. On your own run, leave the
 flag out, or use Evaluation & Tools in the web UI.
 
+### Does a change to the evidence void the approval?
+
+An approval is stored with a hash of the evidence it was given for. `scholarloop.reliability
+approval` copies a run, changes one record at a time, and starts the writing stage on the copy.
+A change counts as blocked when the writer makes no model call.
+
+| What changed | Distillation | AG News | Digits |
+|---|---|---|---|
+| A training record: one digit changed, a record removed or added | 38 of 38 | 179 of 179 | 172 of 172 |
+| Training code, as recorded or on disk | 28 of 28 | 52 of 52 | 68 of 68 |
+| The scorer | 4 of 4 | 4 of 4 | 3 of 3 |
+| A frozen protocol | 8 of 8 | none in this run | 8 of 8 |
+| The literature review or the brief | 8 of 8 | 8 of 8 | 8 of 8 |
+| An approved statement or a limitation | 23 of 23 | 28 of 28 | 27 of 27 |
+| The approval record | 3 of 3 | 3 of 3 | 3 of 3 |
+| All | 112 of 112 | 274 of 274 | 289 of 289 |
+
+After each change was undone, writing started again in every case. The hash has a boundary. It
+covers the training entry point and the scorer, and a frozen protocol also covers every other
+source file of the engine. AG News ran no protocol, and there a change to another engine source
+file went unnoticed (0 of 2, against 2 of 2 on each of the other runs). The profile file is not
+changed in this study; a unit test covers it.
+
+The reports are in `examples/sample_runs/*/reliability/approval.md`. The study needs an approval
+that still holds on your machine, so it runs on your own run, not on the copies in this
+repository:
+
+```bash
+python -m scholarloop.reliability approval --profile profiles/seq-distill.yaml \
+  --run runs/my_study --out runs/my_study/reliability
+```
+
 ### Does the paper say more than the evidence holds?
 
 A judge model read each paper with pipeline marks removed and labelled every result claim
@@ -367,6 +399,68 @@ Same number of training runs for each side, three campaigns each, on digits.
 
 A language model proposing hyperparameters does not beat random search on a small search space.
 If it has an edge, it is in changing the method, and we have not shown that it does.
+
+## Comparison with other systems: sources
+
+The paper's Table 1 compares ScholarLoop with six research-agent systems on six properties. The
+cells were filled from each system's paper and the default branch of its public repository, read
+on 26 November 2026 by static reading; nothing was run. A cell may be out of date, and
+corrections are welcome.
+
+Marks: **yes** code enforces it by default; **optional** it exists but is off by default or
+applies in one mode only; **partial** code enforces it for part of the pipeline; **model** it is
+an instruction to a model or a model's judgment; **none** no description found.
+
+| System | Repository | Commit |
+|---|---|---|
+| AI Scientist-v2 | `SakanaAI/AI-Scientist-v2` | `96bd516` |
+| Agent Laboratory | `SamuelSchmidgall/AgentLaboratory` | `d9017d9` |
+| TinyScientist | `ulab-uiuc/tiny-scientist` | `888c5e3` |
+| Dr. Claw | `OpenLAIR/dr-claw` | `37493cd` |
+| Curie | `Just-Curieous/Curie` | `db1b1f5` |
+| data-to-paper | `Technion-Kishony-lab/data-to-paper` | `81df14c` |
+
+| System | Property | Mark | What it rests on | Where |
+|---|---|---|---|---|
+| AI Scientist-v2 | Researcher decisions | partial | Ideation and experiments are separate commands and the user passes the index of the idea to run; there is no approval step | README, `launch_scientist_bfts.py` |
+| | Dollar cap | none | Cost is tallied after the run; nothing limits it | `ai_scientist/utils/token_tracker.py` |
+| | Scorer outside agent | none | The agent writes the experiment and the code that parses its metrics | `ai_scientist/treesearch/parallel_agent.py` |
+| | Frozen protocol | partial | The harness sets the seeds that replicate each stage's best node; the configurations compared and a falsifying outcome are not fixed | `parallel_agent.py`, `bfts_config.yaml` |
+| | Sentence binding | model | A prompt instruction not to report results absent from the logs | `ai_scientist/perform_icbinb_writeup.py` |
+| | Injection-tested | none | | |
+| Agent Laboratory | Researcher decisions | optional | Co-pilot mode is one of two modes and is off by default | `ai_lab_repo.py`, paper §3.3.1 |
+| | Dollar cap | none | A cost estimate is printed; there is no limit | `inference.py` |
+| | Scorer outside agent | none | Metrics come from agent-written code; a model scores candidate solutions | `mlesolver.py` |
+| | Frozen protocol | model | A plan is written before experiments and a model scores adherence to it | `mlesolver.py`, paper §3.2 |
+| | Sentence binding | none | | |
+| | Injection-tested | none | | |
+| TinyScientist | Researcher decisions | optional | The web interface advances stage by stage; the Python interface and the demo script do not pause | `backend/app.py`, `examples/demo.py` |
+| | Dollar cap | optional | The budget is unset by default; when set, exceeding it raises an error | `tiny_scientist/scientist.py`, `budget_checker.py` |
+| | Scorer outside agent | model | A model validator flags placeholder metrics; the metrics come from the agent's code | `tiny_scientist/coder.py` |
+| | Frozen protocol | model | The same validator checks the code against the planned experiment table | `tiny_scientist/coder.py` |
+| | Sentence binding | none | | |
+| | Injection-tested | partial | The safety checker is tested on known unsafe requests; no faults are inserted into experiments or the paper | paper §6.1–6.2 |
+| Dr. Claw | Researcher decisions | yes | The user dispatches tasks one at a time; an automatic mode is opt-in | README, `server/routes/auto-research.js` |
+| | Dollar cap | none | Token usage is displayed; there is no limit | `server/claude-sdk.js` |
+| | Scorer outside agent | none | A model reviews the implementation | `skills/inno-experiment-dev/SKILL.md` |
+| | Frozen protocol | model | Instructions to the agent | `skills/aris-experiment-plan/SKILL.md` |
+| | Sentence binding | model | The agent is told to write a map from claims to evidence; no code checks it | `skills/ds-write/SKILL.md` |
+| | Injection-tested | partial | One induced error, shown as a recovery demonstration | paper §5.2 |
+| Curie | Researcher decisions | optional | Plan approval is behind a setting that is off in the shipped configurations | `curie/nodes/user_input.py`, `curie/experiment.py` |
+| | Dollar cap | none | Cost is logged; the limit is a number of steps | `curie/model.py` |
+| | Scorer outside agent | partial | The harness re-runs the agent's script, but the script and its metrics are agent-written | `curie/nodes/exec_validator.py` |
+| | Frozen protocol | partial | Plans are stored through a schema and ordered by a scheduler; they can be redone during the run | `curie/tool.py` |
+| | Sentence binding | none | | |
+| | Injection-tested | none | | |
+| data-to-paper | Researcher decisions | yes | Human review is on by default and the run waits for it | `src/data_to_paper/env.py` |
+| | Dollar cap | none | Cost is tracked and displayed | `src/data_to_paper/servers/llm_call.py` |
+| | Scorer outside agent | partial | Analysis code is model-written but runs inside wrappers of the statistics libraries | `src/data_to_paper/run_gpt_code/overrides/` |
+| | Frozen protocol | partial | A hypothesis and plan stage precedes analysis and the seed is fixed; adherence is not checked by code | `research_types/hypothesis_testing/scientific_stage.py` |
+| | Sentence binding | partial | Code rejects a number in the Results section that does not link to an output; other sections are not checked | `src/data_to_paper/base_steps/base_products_conversers.py` |
+| | Injection-tested | none | | |
+
+ScholarLoop's own row: a protocol is frozen on request, so that cell is **optional**. Its
+injection covers the output checks and the approval, not the rules that act during experiments.
 
 ## Known limits
 
